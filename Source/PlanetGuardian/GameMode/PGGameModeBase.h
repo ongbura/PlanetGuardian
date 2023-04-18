@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "PlanetGuardianGameModeBase.generated.h"
+#include "PGGameModeBase.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
-class PLANETGUARDIAN_API APlanetGuardianGameModeBase : public AGameModeBase
+class PLANETGUARDIAN_API APGGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
 };

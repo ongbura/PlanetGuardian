@@ -20,7 +20,8 @@ public class PlanetGuardian : ModuleRules
             "Slate",
             "SlateCore",
             "InputCore",
-            "EnhancedInput"
+            "EnhancedInput",
+            "GameplayTags"
         });
 
         PrivateIncludePaths.Add("PlanetGuardian");

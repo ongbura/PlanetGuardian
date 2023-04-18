@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{E05763A5-4D0E-678D-4201-0189BD6DDD54}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "PlanetGuardian",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}

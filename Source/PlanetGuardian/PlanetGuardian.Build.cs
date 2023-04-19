@@ -21,7 +21,9 @@ public class PlanetGuardian : ModuleRules
             "SlateCore",
             "InputCore",
             "EnhancedInput",
-            "GameplayTags"
+            "GameplayTags",
+            "Niagara", 
+            "GameplayCameras",
         });
 
         PrivateIncludePaths.Add("PlanetGuardian");

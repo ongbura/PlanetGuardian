@@ -4,39 +4,71 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "InputActionValue.h"
 #include "PGGuardian.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
-class UPGInputConfig;
+class UNiagaraComponent;
+class UAudioComponent;
+class UCurveFloat;
 
 UCLASS()
 class PLANETGUARDIAN_API APGGuardian final : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	TObjectPtr<USpringArmComponent> CameraBoom;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
 
-	UPROPERTY(EditDefaultsOnly, Category="Input", meta=(AllowPrivateAccess="true"))
-	TObjectPtr<UPGInputConfig> InputConfig;
+	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	TObjectPtr<USkeletalMeshComponent> Jetpack;
+
+	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UNiagaraComponent> JetpackEffect;
+
+	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UAudioComponent> JetpackSoundEffect;
+
+	bool bIsJetpackActivated{ false };
+	float ThrusterTime{ 0.f};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Jetpack", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UCurveFloat> JetpackBoostCurve;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Jetpack", meta=(AllowPrivateAccess="true"))
+	float ThrusterMaxTime{ 2.f};
 
 public:
 	APGGuardian();
+	
+	/**
+	 * @brief The jetpack can be started, stopped and reset here.
+	 * This is called by the jump input when in air or reset when landed.
+	 * The jetpack and its functionality could become an own component if you would have several characters able to use it.
+	 */
+	void ToggleJetpack(bool bReset, bool bActivate);
 
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 private:
-	void Move(const FInputActionValue& Value);
+	/**
+	 * @brief Update CameraBoom TargetArmLength
+	 */
+	void UpdateCamera(float DeltaSeconds);
+	
+	/**
+	 * @brief Update Jetpack, called from tick function to decrease the thruster time. Using a curve asset to get the Z force applied on the character.
+	 */
+	void UpdateJetpack(float DeltaSeconds);
 
-	void Look(const FInputActionValue& Value);
+	FORCEINLINE void ResetThrusterTime() { ThrusterTime = ThrusterMaxTime; }
+
+	UFUNCTION()
+	void OnLandedToggleJetpack(const FHitResult& Hit);
 };

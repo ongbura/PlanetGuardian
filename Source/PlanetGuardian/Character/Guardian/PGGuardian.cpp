@@ -76,6 +76,8 @@ void APGGuardian::BeginPlay()
 	ResetThrusterTime();
 
 	LandedDelegate.AddDynamic(this, &APGGuardian::OnLandedToggleJetpack);
+
+	
 }
 
 void APGGuardian::Tick(float DeltaTime)

@@ -7,13 +7,27 @@ $sortedData = $csvData | Sort-Object TagName
 $nativeGameplayTagsHMembers = @()
 $nativeGameplayTagsCPPAddTags = @()
 
+$previousHierarchy = ""
+
 foreach ($row in $sortedData) {
     $tagName = $row.TagName
     $tagDevComment = $row.TagDevComment
     $memberName = $tagName.Replace(".", "_")
 
-    $nativeGameplayTagsHMembers += "inline static FGameplayTag $memberName{};"
+    $currentHierarchy = ($tagName -split "\." | Select-Object -First 2) -join "."
 
+    if ($currentHierarchy -ne $previousHierarchy) {
+        if ($previousHierarchy) {
+            $nativeGameplayTagsHMembers += ""
+            $nativeGameplayTagsCPPAddTags += ""
+        }
+        $nativeGameplayTagsHMembers += "// $currentHierarchy"
+        $nativeGameplayTagsCPPAddTags += "// $currentHierarchy"
+        $previousHierarchy = $currentHierarchy
+    }
+
+    $nativeGameplayTagsHMembers += "inline static FGameplayTag $memberName{};"
+    
     if ($tagDevComment) {
         $nativeGameplayTagsCPPAddTags += "$memberName = GameplayTagsManager.AddNativeGameplayTag(`"$tagName`", `"$tagDevComment`");"
     } else {
@@ -22,7 +36,7 @@ foreach ($row in $sortedData) {
 }
 
 $nativeGameplayTagsHContent = @"
-// Copyright (c) 2023 Ongbular(Park Joo Hyeong). All rights reserved.
+// Copyright (c) 2023 Ongbular (Park Joo-Hyeong). All rights reserved.
 
 #pragma once
 
@@ -38,10 +52,10 @@ static struct FPGNativeGameplayTags : FGameplayTagNativeAdder
 "@
 
 $nativeGameplayTagsCPPContent = @"
-// Copyright (c) 2023 Ongbular(Park Joo Hyeong). All rights reserved.
+// Copyright (c) 2023 Ongbular (Park Joo-Hyeong). All rights reserved.
 
+#include "PGNativeGameplayTags.h"
 #include "NativeGameplayTags.h"
-#include "GameplayTagsManager.h"
 
 void FPGNativeGameplayTags::AddTags()
 {

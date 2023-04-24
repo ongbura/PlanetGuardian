@@ -7,9 +7,13 @@
 
 static struct FPGNativeGameplayTags : FGameplayTagNativeAdder
 {
-    inline static FGameplayTag Input_Action_Jump{};
+    // Attribute.Common
+	inline static FGameplayTag Attribute_Common_Health{};
+	
+	// Input.Action
+	inline static FGameplayTag Input_Action_Jump{};
 	inline static FGameplayTag Input_Action_Look{};
 	inline static FGameplayTag Input_Action_Move{};
 
     virtual void AddTags() override;
-} GTags;
+} GGameplayTags;

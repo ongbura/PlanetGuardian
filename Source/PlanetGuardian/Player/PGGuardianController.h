@@ -3,15 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "PGPlayerController.h"
 #include "InputActionValue.h"
 #include "PGGuardianController.generated.h"
 
 class UPGInputConfig;
-class APGGuardian;
 
 UCLASS()
-class PLANETGUARDIAN_API APGGuardianController : public APlayerController
+class PLANETGUARDIAN_API APGGuardianController : public APGPlayerController
 {
 	GENERATED_BODY()
 

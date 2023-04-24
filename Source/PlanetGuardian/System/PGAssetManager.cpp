@@ -3,6 +3,8 @@
 
 #include "PGAssetManager.h"
 
+#include "AbilitySystemGlobals.h"
+
 UPGAssetManager& UPGAssetManager::Get()
 {
 	static auto* const AssetManager = Cast<UPGAssetManager>(&UAssetManager::Get());
@@ -13,5 +15,5 @@ void UPGAssetManager::StartInitialLoading()
 {
 	Super::StartInitialLoading();
 
-	// UPGGameplayTagsManager::Get().InitializePlanetGuardianTags();
+	UAbilitySystemGlobals::Get().InitGlobalData();
 }

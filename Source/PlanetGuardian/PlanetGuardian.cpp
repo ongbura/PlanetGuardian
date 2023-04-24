@@ -1,6 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "PlanetGuardian.h"
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, PlanetGuardian, "PlanetGuardian" );
+class FPGPlanetGuardianModule final : public FDefaultGameModuleImpl
+{
+	virtual void StartupModule() override
+	{
+	}
+
+	virtual void ShutdownModule() override
+	{
+	}
+};
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FPGPlanetGuardianModule, PlanetGuardian, "PlanetGuardian" );

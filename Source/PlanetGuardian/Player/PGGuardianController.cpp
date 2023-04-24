@@ -8,14 +8,10 @@
 #include "PGNativeGameplayTags.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-#define RETURN_PAWN_IF_NULL() if (GetPawn() == nullptr) { return; }
-
-// Sets default values
 APGGuardianController::APGGuardianController()
 {
 }
 
-// Called when the game starts or when spawned
 void APGGuardianController::BeginPlay()
 {
 	Super::BeginPlay();

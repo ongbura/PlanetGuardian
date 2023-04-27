@@ -8,7 +8,7 @@
 
 UPGHealthAttributeSet::UPGHealthAttributeSet()
 {
-	AttributeSetTag = GGameplayTags.Attribute_Common_Health;
+	AttributeSetTag = GNativeTags.Attribute_Common_Health;
 }
 
 void UPGHealthAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)

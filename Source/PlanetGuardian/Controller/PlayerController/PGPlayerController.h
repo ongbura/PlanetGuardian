@@ -6,8 +6,6 @@
 #include "GameFramework/PlayerController.h"
 #include "PGPlayerController.generated.h"
 
-#define RETURN_PAWN_IF_NULL() if (GetPawn() == nullptr) { return; }
-
 UCLASS()
 class PLANETGUARDIAN_API APGPlayerController : public APlayerController
 {

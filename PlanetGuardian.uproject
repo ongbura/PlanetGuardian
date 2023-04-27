@@ -29,10 +29,6 @@
 		{
 			"Name": "GameplayAbilities",
 			"Enabled": true
-		},
-		{
-			"Name": "ModularGameplay",
-			"Enabled": true
 		}
 	]
 }

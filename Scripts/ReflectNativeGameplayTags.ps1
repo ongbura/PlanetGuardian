@@ -4,6 +4,8 @@ $csvData = Import-Csv -Path "..\Config\NativeGameplayTags.csv"
 
 $sortedData = $csvData | Sort-Object TagName
 
+$sortedData | Export-Csv -Path "..\Config\NativeGameplayTags.csv" -NoTypeInformation
+
 $nativeGameplayTagsHMembers = @()
 $nativeGameplayTagsCPPAddTags = @()
 
@@ -26,7 +28,7 @@ foreach ($row in $sortedData) {
         $previousHierarchy = $currentHierarchy
     }
 
-    $nativeGameplayTagsHMembers += "inline static FGameplayTag $memberName{};"
+    $nativeGameplayTagsHMembers += "FGameplayTag $memberName{};"
     
     if ($tagDevComment) {
         $nativeGameplayTagsCPPAddTags += "$memberName = GameplayTagsManager.AddNativeGameplayTag(`"$tagName`", `"$tagDevComment`");"

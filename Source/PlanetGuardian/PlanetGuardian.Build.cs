@@ -25,8 +25,7 @@ public class PlanetGuardian : ModuleRules
             "GameplayCameras",
             "GameplayAbilities",
             "GameplayTags",
-            "GameplayTasks", 
-            "ModularGameplay",
+            "GameplayTasks",
         });
 
         PrivateIncludePaths.Add("PlanetGuardian");

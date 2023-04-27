@@ -2,12 +2,8 @@
 
 
 #include "PGPlayerController.h"
-#include "Character/PGCharacter.h"
 
 void APGPlayerController::AcknowledgePossession(APawn* P)
 {
 	Super::AcknowledgePossession(P);
-	
-	const auto* Avatar = CastChecked<APGCharacter>(P);
-	Avatar->OnControllerChanged.Broadcast();
 }

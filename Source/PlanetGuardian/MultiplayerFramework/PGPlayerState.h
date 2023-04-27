@@ -21,7 +21,7 @@ public:
 	APGPlayerState();
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	UPGAbilitySystemComponent* GetAbilitySystem() const { return AbilitySystem;}
+	UPGAbilitySystemComponent* GetPGAbilitySystemComponent() const { return AbilitySystem;}
 	
 protected:
 	// Called when the game starts or when spawned

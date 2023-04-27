@@ -16,4 +16,4 @@ static struct FPGNativeGameplayTags : FGameplayTagNativeAdder
 	inline static FGameplayTag Input_Action_Move{};
 
     virtual void AddTags() override;
-} GGameplayTags;
+} GNativeTags;

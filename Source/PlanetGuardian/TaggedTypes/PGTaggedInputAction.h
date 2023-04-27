@@ -14,7 +14,7 @@ struct FPGTaggedInputAction
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> InputAction{ nullptr };
+	TSoftObjectPtr<UInputAction> InputAction { nullptr };
 
 	UPROPERTY(EditDefaultsOnly, meta=(Categories="Input.Action"))
 	FGameplayTag Tag;

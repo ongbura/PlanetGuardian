@@ -3,5 +3,5 @@
 
 #include "PGLogChannels.h"
 
-DEFINE_LOG_CATEGORY(Init);
+DEFINE_LOG_CATEGORY(Initialization);
 DEFINE_LOG_CATEGORY(AbilitySystem);

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/PGCharacter.h"
+#include "Character/PlayableCharacter/PGPlayableCharacter.h"
 #include "PGGuardian.generated.h"
 
 class USpringArmComponent;
@@ -15,7 +15,7 @@ class UPGAbilitySystemComponent;
 class UPGHealthAttributeSet;
 
 UCLASS()
-class PLANETGUARDIAN_API APGGuardian final : public APGCharacter
+class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
 {
 	GENERATED_BODY()
 

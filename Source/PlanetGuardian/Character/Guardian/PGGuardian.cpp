@@ -5,11 +5,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "NiagaraComponent.h"
-#include "AbilitySystem/PGAbilitySystemComponent.h"
 #include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 APGGuardian::APGGuardian()
 	: CameraBoom(CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom")))
@@ -34,8 +32,6 @@ APGGuardian::APGGuardian()
 
 	JetpackSoundEffect->SetupAttachment(RootComponent);
 	JetpackSoundEffect->SetAutoActivate(false);
-
-	AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 }
 
 void APGGuardian::ToggleJetpack(const bool bReset, const bool bActivate)

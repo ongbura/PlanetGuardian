@@ -22,3 +22,8 @@ void UPGAbilitySystemComponent::BeginPlay()
 	// ...
 	
 }
+
+void UPGAbilitySystemComponent::OnGiveAbility(FGameplayAbilitySpec& AbilitySpec)
+{
+	Super::OnGiveAbility(AbilitySpec);
+}

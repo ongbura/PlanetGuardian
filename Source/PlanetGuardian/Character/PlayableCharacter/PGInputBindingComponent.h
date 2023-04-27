@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "PGPawnAssistantComponent.h"
 #include "EnhancedInputComponent.h"
-#include "TaggedTypes/PGTaggedInputAction.h"
 #include "PGLogChannels.h"
+#include "Subsystem/PGTaggedTypeManager.h"
 #include "PGInputBindingComponent.generated.h"
 
 class UEnhancedInputLocalPlayerSubsystem;
@@ -16,9 +16,6 @@ UCLASS(meta=(BlueprintSpawnableComponent))
 class PLANETGUARDIAN_API UPGInputBindingComponent : public UPGPawnAssistantComponent
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(TitleProperty="Input Action", AllowPrivateAccess="true"))
-	TSet<FPGTaggedInputAction> InputActions;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	TSoftObjectPtr<UInputMappingContext> InputMappingContext;
@@ -42,8 +39,6 @@ protected:
 	virtual void InitializeComponent() override;
 
 private:
-	UInputAction* LoadInputActionForTag(const FGameplayTag& Tag) const;
-
 	UInputMappingContext* LoadInputMappingContext() const;
 };
 
@@ -56,10 +51,13 @@ void UPGInputBindingComponent::BindActionByTag(const FGameplayTag& InputTag, ETr
 		UE_LOG(Initialization, Error, TEXT("InputBindingComponent's Initialization has failed."));
 		return;
 	}
-	
-	if (const auto* InputAction = LoadInputActionForTag(InputTag))
+
+	if (const auto* TaggedTypesManager = UPGTaggedTypeManager::Get())
 	{
-		InputComponent->BindAction(InputAction, TriggerEvent, Object, Func);
+		if (const auto* InputAction = TaggedTypesManager->FindInputAction(InputTag))
+		{
+			InputComponent->BindAction(InputAction, TriggerEvent, Object, Func);
+		}
 	}
 	else
 	{

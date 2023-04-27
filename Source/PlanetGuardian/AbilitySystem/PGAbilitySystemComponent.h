@@ -11,6 +11,7 @@
 
 class UPGGameplayAbility;
 class UGameplayEffect;
+class UPGInputBindingComponent;
 
 UCLASS()
 class PLANETGUARDIAN_API UPGAbilitySystemComponent : public UAbilitySystemComponent
@@ -20,6 +21,8 @@ class PLANETGUARDIAN_API UPGAbilitySystemComponent : public UAbilitySystemCompon
 	bool bStartupEffectsApplied{ false };
 
 	TMap<FGameplayTag, TArray<FDelegateHandle>> AttributeChangedDelegateHandles;
+
+	TWeakObjectPtr<UPGInputBindingComponent> InputBindingComponent;
 	
 public:
 	UPGAbilitySystemComponent();
@@ -35,6 +38,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void OnGiveAbility(FGameplayAbilitySpec& AbilitySpec) override;
 };
 
 template <typename UserClass, typename FuncType>

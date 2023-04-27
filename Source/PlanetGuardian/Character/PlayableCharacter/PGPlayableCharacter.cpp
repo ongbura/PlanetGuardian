@@ -16,12 +16,12 @@ APGPlayableCharacter::APGPlayableCharacter()
 
 UAbilitySystemComponent* APGPlayableCharacter::GetAbilitySystemComponent() const
 {
-	if (AbilitySystemComponent.IsValid())
-	{
-		return AbilitySystemComponent.Get();
-	}
+	return AvatarComponent->GetPGAbilitySystemComponent();
+}
 
-	return nullptr;
+UPGAbilitySystemComponent* APGPlayableCharacter::GetPGAbilitySystemComponent() const
+{
+	return AvatarComponent->GetPGAbilitySystemComponent();
 }
 
 void APGPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -40,9 +40,7 @@ void APGPlayableCharacter::PossessedBy(AController* NewController)
 
 	if (auto* PS = GetPlayerStateChecked<APGPlayerState>())
 	{
-		AbilitySystemComponent = PS->GetPGAbilitySystemComponent();
-		
-		AvatarComponent->InitializeAbilitySystem(AbilitySystemComponent.Get(), PS);
+		AvatarComponent->InitializeAbilitySystem(PS->GetPGAbilitySystemComponent(), PS);
 
 		if (GetNetMode() != NM_DedicatedServer && IsLocallyControlled())
 		{

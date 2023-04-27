@@ -4,10 +4,7 @@
 #include "PGInputBindingComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "PGAvatarComponent.h"
-#include "PGNativeGameplayTags.h"
 #include "Controller/PlayerController/PGPlayerController.h"
-#include "Input/PGInputConfig.h"
-#include "InputAction.h"
 #include "InputMappingContext.h"
 
 UPGInputBindingComponent::UPGInputBindingComponent()
@@ -40,16 +37,6 @@ void UPGInputBindingComponent::InitializeComponent()
 			AvatarComponent->OnPlayerControllerAssigned.AddUObject(this, &ThisClass::OnPlayerControllerAssigned);
 		}
 	}
-}
-
-UInputAction* UPGInputBindingComponent::LoadInputActionForTag(const FGameplayTag& Tag) const
-{
-	if (const auto* Found = InputActions.Find({ nullptr, Tag }))
-	{
-		return Found->InputAction.LoadSynchronous();
-	}
-
-	return nullptr;
 }
 
 UInputMappingContext* UPGInputBindingComponent::LoadInputMappingContext() const

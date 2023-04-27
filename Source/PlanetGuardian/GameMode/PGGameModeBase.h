@@ -14,4 +14,7 @@ class PLANETGUARDIAN_API APGGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
+protected:
+	virtual void InitGameState() override;
+
 };

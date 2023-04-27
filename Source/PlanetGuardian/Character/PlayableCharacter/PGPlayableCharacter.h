@@ -19,9 +19,6 @@ class PLANETGUARDIAN_API APGPlayableCharacter : public ACharacter, public IAbili
 	
 protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Avatar")
-	TWeakObjectPtr<UPGAbilitySystemComponent> AbilitySystemComponent;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Avatar")
 	TObjectPtr<UPGAvatarComponent> AvatarComponent;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Avatar")
@@ -34,7 +31,7 @@ public:
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	UPGAbilitySystemComponent* GetPGAbilitySystemComponent() const { return AbilitySystemComponent.Get(); }
+	UPGAbilitySystemComponent* GetPGAbilitySystemComponent() const;
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;

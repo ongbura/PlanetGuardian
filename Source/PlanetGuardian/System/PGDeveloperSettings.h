@@ -6,8 +6,7 @@
 #include "Engine/DeveloperSettings.h"
 #include "PGDeveloperSettings.generated.h"
 
-class UPGTaggedAbility;
-class UPGTaggedInputAction;
+class UPGInputActionData;
 
 UCLASS(Config=Game, DefaultConfig, meta=(DisplayName="Planet Guardian Settings"))
 class PLANETGUARDIAN_API UPGDeveloperSettings : public UDeveloperSettings
@@ -15,11 +14,8 @@ class PLANETGUARDIAN_API UPGDeveloperSettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Tagged Types")
-	TSoftObjectPtr<UPGTaggedInputAction> InputActions;
-
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Tagged Types")
-	TSoftObjectPtr<UPGTaggedAbility> Abilities;
-
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Input Configuration", meta=(DisplayName="Input Action Configuration Data"))
+	TSoftObjectPtr<UPGInputActionData> InputActionConfigData;
+	
 	UPGDeveloperSettings() = default;
 };

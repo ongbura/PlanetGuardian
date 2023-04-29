@@ -15,9 +15,18 @@ UPGInputBindingComponent::UPGInputBindingComponent()
 	bWantsInitializeComponent = true;
 }
 
+void UPGInputBindingComponent::BindAbilityByTag(const FGameplayTag& AbilityTag)
+{
+	if (const auto* TaggedTypesManager = UPGAssistantSubsystem::Get())
+	{
+		
+	}
+}
+
 void UPGInputBindingComponent::OnPlayerControllerAssigned(APGPlayerController* InController)
 {
 	InputSubsystem = InController->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	
 	check(InputSubsystem.IsValid());
 
 	InputComponent = Cast<UEnhancedInputComponent>(InController->InputComponent);

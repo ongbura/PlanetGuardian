@@ -6,7 +6,7 @@
 #include "PGPawnAssistantComponent.h"
 #include "EnhancedInputComponent.h"
 #include "PGLogChannels.h"
-#include "Subsystem/PGTaggedTypeManager.h"
+#include "Subsystem/PGAssistantSubsystem.h"
 #include "PGInputBindingComponent.generated.h"
 
 class UEnhancedInputLocalPlayerSubsystem;
@@ -31,7 +31,9 @@ public:
 	UPGInputBindingComponent();
 	
 	template <typename UserClass, typename FuncType>
-	void BindActionByTag(const FGameplayTag& InputTag, ETriggerEvent TriggerEvent, UserClass* Object, FuncType Func);
+	void BindInputActionByTag(const FGameplayTag& InputTag, ETriggerEvent TriggerEvent, UserClass* Object, FuncType Func);
+
+	void BindAbilityByTag(const FGameplayTag& AbilityTag);
 
 	void OnPlayerControllerAssigned(APGPlayerController* InController);
 
@@ -43,7 +45,7 @@ private:
 };
 
 template <typename UserClass, typename FuncType>
-void UPGInputBindingComponent::BindActionByTag(const FGameplayTag& InputTag, ETriggerEvent TriggerEvent,
+void UPGInputBindingComponent::BindInputActionByTag(const FGameplayTag& InputTag, ETriggerEvent TriggerEvent,
                                                UserClass* Object, FuncType Func)
 {
 	if (!InputComponent.IsValid())
@@ -52,7 +54,7 @@ void UPGInputBindingComponent::BindActionByTag(const FGameplayTag& InputTag, ETr
 		return;
 	}
 
-	if (const auto* TaggedTypesManager = UPGTaggedTypeManager::Get())
+	if (const auto* TaggedTypesManager = UPGAssistantSubsystem::Get())
 	{
 		if (const auto* InputAction = TaggedTypesManager->FindInputAction(InputTag))
 		{

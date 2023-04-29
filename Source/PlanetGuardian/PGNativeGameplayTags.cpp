@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Ongbular(Park Joo Hyeong). All rights reserved.
+// Copyright (c) 2023 Ongbular (Park Joo-Hyeong). All rights reserved.
 
 #include "PGNativeGameplayTags.h"
 #include "NativeGameplayTags.h"
@@ -7,7 +7,13 @@ void FPGNativeGameplayTags::AddTags()
 {
     auto& GameplayTagsManager = UGameplayTagsManager::Get();
 
-    // Attribute.Common
+    // Ability.Crouch
+	Ability_Crouch = GameplayTagsManager.AddNativeGameplayTag("Ability.Crouch");
+	
+	// Ability.Jump
+	Ability_Jump = GameplayTagsManager.AddNativeGameplayTag("Ability.Jump");
+	
+	// Attribute.Common
 	Attribute_Common_Health = GameplayTagsManager.AddNativeGameplayTag("Attribute.Common.Health");
 	
 	// Input.Action

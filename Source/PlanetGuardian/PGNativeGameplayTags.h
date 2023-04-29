@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Ongbular(Park Joo Hyeong). All rights reserved.
+// Copyright (c) 2023 Ongbular (Park Joo-Hyeong). All rights reserved.
 
 #pragma once
 
@@ -7,13 +7,19 @@
 
 static struct FPGNativeGameplayTags : FGameplayTagNativeAdder
 {
-    // Attribute.Common
-	inline static FGameplayTag Attribute_Common_Health{};
+    // Ability.Crouch
+	FGameplayTag Ability_Crouch{};
+	
+	// Ability.Jump
+	FGameplayTag Ability_Jump{};
+	
+	// Attribute.Common
+	FGameplayTag Attribute_Common_Health{};
 	
 	// Input.Action
-	inline static FGameplayTag Input_Action_Jump{};
-	inline static FGameplayTag Input_Action_Look{};
-	inline static FGameplayTag Input_Action_Move{};
+	FGameplayTag Input_Action_Jump{};
+	FGameplayTag Input_Action_Look{};
+	FGameplayTag Input_Action_Move{};
 
     virtual void AddTags() override;
 } GNativeTags;

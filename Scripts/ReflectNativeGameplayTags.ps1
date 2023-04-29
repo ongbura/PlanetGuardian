@@ -50,7 +50,7 @@ static struct FPGNativeGameplayTags : FGameplayTagNativeAdder
     $($nativeGameplayTagsHMembers -join "`r`n`t")
 
     virtual void AddTags() override;
-} GTags;
+} GNativeTags;
 "@
 
 $nativeGameplayTagsCPPContent = @"

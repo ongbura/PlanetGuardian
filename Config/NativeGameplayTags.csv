@@ -1,6 +1,7 @@
-﻿TagName,TagDevComment
-Input.Action.Move,
-Input.Action.Look,
+"TagName","TagDevComment"
+"Ability.Crouch",""
+"Ability.Jump",""
+"Attribute.Common.Health",""
+"Input.Action.Look",""
+Input.Action.Move,""
 Input.Action.Jump,
-AttributeSet.Common.Health,
-,

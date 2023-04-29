@@ -6,9 +6,6 @@
 #include "Engine/AssetManager.h"
 #include "PGAssetManager.generated.h"
 
-/**
- *
- */
 UCLASS()
 class PLANETGUARDIAN_API UPGAssetManager : public UAssetManager
 {
@@ -16,7 +13,7 @@ class PLANETGUARDIAN_API UPGAssetManager : public UAssetManager
 
 public:
 	static UPGAssetManager& Get();
-
+	
 protected:
 	virtual void StartInitialLoading() override;
 };

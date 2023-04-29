@@ -13,4 +13,5 @@ UCLASS()
 class PLANETGUARDIAN_API UPGGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
+
 };

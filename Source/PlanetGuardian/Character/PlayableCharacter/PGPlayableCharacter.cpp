@@ -6,7 +6,7 @@
 #include "PGInputBindingComponent.h"
 #include "PGNativeGameplayTags.h"
 #include "AbilitySystem/PGAbilitySystemComponent.h"
-#include "MultiplayerFramework/PGPlayerState.h"
+#include "Multiplayer/PGPlayerState.h"
 
 APGPlayableCharacter::APGPlayableCharacter()
 {
@@ -28,8 +28,8 @@ void APGPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	InputBindingComponent->BindActionByTag(GNativeTags.Input_Action_Move, ETriggerEvent::Triggered, this, &ThisClass::Move);
-	InputBindingComponent->BindActionByTag(GNativeTags.Input_Action_Look, ETriggerEvent::Triggered, this, &ThisClass::Look);
+	InputBindingComponent->BindInputActionByTag(GNativeTags.Input_Action_Move, ETriggerEvent::Triggered, this, &ThisClass::Move);
+	InputBindingComponent->BindInputActionByTag(GNativeTags.Input_Action_Look, ETriggerEvent::Triggered, this, &ThisClass::Look);
 }
 
 void APGPlayableCharacter::PossessedBy(AController* NewController)

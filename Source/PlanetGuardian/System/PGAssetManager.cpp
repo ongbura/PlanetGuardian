@@ -2,7 +2,6 @@
 
 
 #include "PGAssetManager.h"
-
 #include "AbilitySystemGlobals.h"
 
 UPGAssetManager& UPGAssetManager::Get()

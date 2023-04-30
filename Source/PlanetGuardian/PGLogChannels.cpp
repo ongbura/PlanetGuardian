@@ -3,5 +3,5 @@
 
 #include "PGLogChannels.h"
 
-DEFINE_LOG_CATEGORY(Initialization);
-DEFINE_LOG_CATEGORY(AbilitySystem);
+DEFINE_LOG_CATEGORY(PGInitialization);
+DEFINE_LOG_CATEGORY(PGAbilitySystem);

@@ -50,7 +50,7 @@ void UPGInputBindingComponent::BindInputActionByTag(const FGameplayTag& InputTag
 {
 	if (!InputComponent.IsValid())
 	{
-		UE_LOG(Initialization, Error, TEXT("InputBindingComponent's Initialization has failed."));
+		UE_LOG(PGInitialization, Error, TEXT("InputBindingComponent's Initialization has failed."));
 		return;
 	}
 
@@ -63,6 +63,6 @@ void UPGInputBindingComponent::BindInputActionByTag(const FGameplayTag& InputTag
 	}
 	else
 	{
-		UE_LOG(Initialization, Error, TEXT("Can't find the ActionInput matching given tag."));
+		UE_LOG(PGInitialization, Error, TEXT("Can't find the ActionInput matching given tag."));
 	}
 }

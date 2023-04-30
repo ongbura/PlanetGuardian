@@ -10,7 +10,9 @@
 APGEffectorEmitter::APGEffectorEmitter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
 	SetHidden(true);
+	SetActorTickEnabled(false);
 
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);
@@ -44,26 +46,66 @@ void APGEffectorEmitter::Activate()
 	const bool bIsVisualFXValid = VisualFX->GetAsset() != nullptr;
 	const bool bIsSoundFXValid = SoundFX->Sound != nullptr;
 	
-	if (bIsVisualFXValid && bIsSoundFXValid)
+	if (bIsVisualFXValid || bIsSoundFXValid)
 	{
 		SetActorHiddenInGame(false);
+		SetActorTickEnabled(true);
 
 		if (bIsVisualFXValid)
 		{
+			VisualFX->OnSystemFinished.AddDynamic(this, &APGEffectorEmitter::OnEndEmissionVisualFX);
 			bVisualFXEmittedComplete = false;
 			VisualFX->Activate();
 		}
 
 		if (bIsSoundFXValid)
 		{
+			SoundFX->OnAudioFinished.AddDynamic(this, &APGEffectorEmitter::OnEndEmissionSoundFX);
 			bSoundFXEmittedComplete = false;
 			SoundFX->Play();
 		}
+
+		bActivated = true;
 	}
 	else
 	{
 		TryReturnToEffectEmitterPool();
-	}	
+	}
+}
+
+void APGEffectorEmitter::Deactivate()
+{
+	if (!bActivated)
+	{
+		return;
+	}
+
+	SetActorHiddenInGame(true);
+	SetActorTickEnabled(false);
+	
+	const bool bIsVisualFXValid = VisualFX->GetAsset() != nullptr;
+	const bool bIsSoundFXValid = SoundFX->Sound != nullptr;	
+
+	if (bIsVisualFXValid)
+	{
+		VisualFX->ResetSystem();
+		VisualFX->OnSystemFinished.Clear();
+	}
+
+	if (bIsSoundFXValid)
+	{
+		SoundFX->Sound = nullptr;
+		SoundFX->ResetParameters();
+		SoundFX->OnAudioFinished.Clear();
+	}
+
+	if (bAttachedToMesh)
+	{
+		DetachFromActor({ EDetachmentRule::KeepWorld, false });
+		bAttachedToMesh = false;
+	}
+
+	bActivated = false;
 }
 
 void APGEffectorEmitter::SetVisualEffect(UNiagaraSystem* VisualFXSystem) const
@@ -85,9 +127,6 @@ void APGEffectorEmitter::SetSoundEffect(USoundBase* SoundFXSystem) const
 void APGEffectorEmitter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	VisualFX->OnSystemFinished.AddDynamic(this, &APGEffectorEmitter::OnEndEmissionVisualFX);
-	SoundFX->OnAudioFinished.AddDynamic(this, &APGEffectorEmitter::OnEndEmissionSoundFX);
 }
 
 void APGEffectorEmitter::OnEndEmissionVisualFX(UNiagaraComponent* PSystem)
@@ -114,13 +153,7 @@ void APGEffectorEmitter::TryReturnToEffectEmitterPool()
 		return;
 	}
 
-	SetActorHiddenInGame(true);
-
-	if (bAttachedToMesh)
-	{
-		DetachFromActor({ EDetachmentRule::KeepWorld, false });
-		bAttachedToMesh = false;
-	}
+	Deactivate();
 
 	if (auto* EffectSubsystem = UPGEffectSubsystem::Get())
 	{

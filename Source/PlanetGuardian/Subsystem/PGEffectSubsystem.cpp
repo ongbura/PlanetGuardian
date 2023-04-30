@@ -52,7 +52,7 @@ void UPGEffectSubsystem::PushEffectEmitter(APGEffectorEmitter* Emitter)
 	{
 		FScopeLock Lock(&ActivatedEmittersMutex);
 
-		// check(ActivatedEmitters.Find(Emitter) != nullptr);
+		check(ActivatedEmitters.Find(Emitter) != nullptr);
 		ActivatedEmitters.Remove(Emitter);
 	}
 
@@ -104,6 +104,8 @@ void UPGEffectSubsystem::GenerateEffectEmitters(const int32 NumEmitters)
 	}
 
 	EmitterPoolSize += NumEmitters;
+
+	UE_LOG(LogTemp, Warning, TEXT("UPGEffectSubsystem::GenerateEffectEmitters: Current Emitter Pool Size: %d"), EmitterPoolSize);
 }
 
 const UPGEffectSetData* UPGEffectSubsystem::FindOrLoadEffectSet(const TSoftObjectPtr<UPGEffectSetData>& SoftEffectSet)

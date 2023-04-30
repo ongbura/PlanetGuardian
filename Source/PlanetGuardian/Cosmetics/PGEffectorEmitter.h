@@ -33,6 +33,8 @@ class PLANETGUARDIAN_API APGEffectorEmitter : public AActor
 	bool bSoundFXEmittedComplete { true };
 
 	bool bAttachedToMesh { false };
+
+	bool bActivated { false };
 	
 public:
 	APGEffectorEmitter();
@@ -46,6 +48,8 @@ protected:
 	
 private:	
 	void Activate();
+
+	void Deactivate();
 	
 	void SetVisualEffect(UNiagaraSystem* VisualFXSystem) const;
 

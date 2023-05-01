@@ -25,5 +25,20 @@ void UPGAbilitySystemComponent::BeginPlay()
 
 void UPGAbilitySystemComponent::OnGiveAbility(FGameplayAbilitySpec& AbilitySpec)
 {
+	if (OnGiveAbilityEvent.IsBound())
+	{
+		OnGiveAbilityEvent.Broadcast(AbilitySpec);
+	}
+	
 	Super::OnGiveAbility(AbilitySpec);
+}
+
+void UPGAbilitySystemComponent::OnRemoveAbility(FGameplayAbilitySpec& AbilitySpec)
+{
+	if (OnRemoveAbilityEvent.IsBound())
+	{
+		OnRemoveAbilityEvent.Broadcast(AbilitySpec);
+	}
+	
+	Super::OnRemoveAbility(AbilitySpec);
 }

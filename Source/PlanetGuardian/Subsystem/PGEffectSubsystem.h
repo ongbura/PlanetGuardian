@@ -6,8 +6,7 @@
 #include "PGGameInstanceSubsystem.h"
 #include "PGEffectSubsystem.generated.h"
 
-class APGEffectorEmitter;
-class UPGEffectSetData;
+class APGEffectEmitter;
 class UNiagaraSystem;
 class USoundBase;
 
@@ -17,33 +16,26 @@ class PLANETGUARDIAN_API UPGEffectSubsystem : public UPGGameInstanceSubsystem
 	GENERATED_BODY()
 
 	UPROPERTY()
-	TMap<FSoftObjectPath, const UPGEffectSetData*> EffectSetMap;
+	TMap<FSoftObjectPath, UNiagaraSystem*> VisualFXMap;
 
 	UPROPERTY()
-	TArray<APGEffectorEmitter*> AllEffectEmitters;
-
-	TQueue<APGEffectorEmitter*, EQueueMode::Mpsc> EmitterPool;
-	int32 EmitterPoolSize { 0 };
-
-	TSet<APGEffectorEmitter*> ActivatedEmitters;
-
-	mutable FCriticalSection ActivatedEmittersMutex;
+	TMap<FSoftObjectPath, USoundBase*> SoundFXMap;
 
 public:
 	static UPGEffectSubsystem* Get();
-	
-	APGEffectorEmitter* PopEffectEmitter(const TSoftObjectPtr<UPGEffectSetData>& SoftEffectSet);
 
-	void PushEffectEmitter(APGEffectorEmitter* Emitter);
+	UNiagaraSystem* FindOrLoadNiagaraSystem(const TSoftObjectPtr<UNiagaraSystem>& SoftNiagaraSystem);
+
+	USoundBase* FindOrLoadSoundBase(const TSoftObjectPtr<USoundBase>& SoftSoundBase);
 
 protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-private:
-	void GenerateEffectEmitters(int32 NumEmitters);
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override { return true; }
 
-	const UPGEffectSetData* FindOrLoadEffectSet(const TSoftObjectPtr<UPGEffectSetData>& SoftEffectSet);
+private:
+	void AsyncLoadVisualSoundEffects();
 
 	UFUNCTION()
-	void OnInitialEffectsLoaded();
+	void OnAsyncLoadVisualSoundEffectsComplete(TArray<FAssetData> LoadedEffectData);
 };

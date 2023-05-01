@@ -31,7 +31,7 @@ void UPGAvatarComponent::InitializeAbilitySystem(UPGAbilitySystemComponent* InAS
 	AbilitySystemComponent = InASC;
 	AbilitySystemComponent->InitAbilityActorInfo(InOwnerActor, GetPawnChecked<APawn>());
 
-	OnAbilitySystemInitialized.Broadcast();
+	OnAbilitySystemInitialized.Broadcast(InASC);
 }
 
 void UPGAvatarComponent::UninitializeAbilitySystem()

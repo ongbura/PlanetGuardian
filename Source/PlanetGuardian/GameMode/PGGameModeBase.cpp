@@ -3,11 +3,11 @@
 
 #include "PGGameModeBase.h"
 
-#include "System/PGSingleton.h"
+#include "System/PGGameGlobals.h"
 
 void APGGameModeBase::InitGameState()
 {
 	Super::InitGameState();
 
-	UPGSingleton::Get().SetCurrentWorld(GetWorld());
+	UPGGameGlobals::Get().SetCurrentWorld(GetWorld());
 }

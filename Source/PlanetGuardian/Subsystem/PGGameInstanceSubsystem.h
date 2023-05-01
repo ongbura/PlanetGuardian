@@ -17,6 +17,9 @@ class PLANETGUARDIAN_API UPGGameInstanceSubsystem : public UGameInstanceSubsyste
 public:
 	template <typename T>
 	T* Get(const UObject* WorldContextObject);
+
+protected:
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override { return false; }
 };
 
 template <typename T>

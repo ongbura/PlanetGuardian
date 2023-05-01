@@ -20,16 +20,7 @@ class PLANETGUARDIAN_API UPGAnimNotify_EffectsEmitter : public UAnimNotify
 #endif
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	FString EffectName;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	FVector LocationOffset { FVector::ZeroVector };
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	FRotator RotationOffset { FRotator::ZeroRotator };
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	TSoftObjectPtr<UPGEffectSetData> EffectSet;
+	FString NotifyDisplayName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FPGEffectSettings_VFX VFXSettings;
@@ -39,9 +30,6 @@ class PLANETGUARDIAN_API UPGAnimNotify_EffectsEmitter : public UAnimNotify
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	bool bShouldAttached { false };
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	bool bLoadEffectsAsynchronous { false };
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
 		meta=(AllowPrivateAccess="true", EditCondition="bShouldAttached", EditConditionHides))
@@ -62,4 +50,9 @@ protected:
 	
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	                    const FAnimNotifyEventReference& EventReference) override;
+
+private:
+	void SpawnNiagaraEffect(UNiagaraSystem* NiagaraSystem, USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation);
+
+	void SpawnSound(USoundBase* Sound, USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation);
 };

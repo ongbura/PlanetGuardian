@@ -18,6 +18,14 @@ class PLANETGUARDIAN_API UPGAbilitySystemComponent : public UAbilitySystemCompon
 {
 	GENERATED_BODY()
 
+	DECLARE_EVENT_OneParam(UPGAbilitySystemComponent, FOnGiveAbility, FGameplayAbilitySpec&)
+	DECLARE_EVENT_OneParam(UPGAbilitySystemComponent, FOnRemoveAbility, FGameplayAbilitySpec&)
+
+public:
+	FOnGiveAbility OnGiveAbilityEvent;
+	FOnRemoveAbility OnRemoveAbilityEvent;
+
+private:
 	bool bStartupEffectsApplied{ false };
 
 	TMap<FGameplayTag, TArray<FDelegateHandle>> AttributeChangedDelegateHandles;
@@ -40,6 +48,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void OnGiveAbility(FGameplayAbilitySpec& AbilitySpec) override;
+
+	virtual void OnRemoveAbility(FGameplayAbilitySpec& AbilitySpec) override;
 };
 
 template <typename UserClass, typename FuncType>

@@ -2,139 +2,122 @@
 
 
 #include "PGEffectSubsystem.h"
-#include "Cosmetics/PGEffectorEmitter.h"
-#include "DataAsset/PGEffectSetData.h"
-#include "System/PGDeveloperSettings.h"
+#include "System/PGGameGlobals.h"
+#include "NiagaraSystem.h"
 #include "System/PGAssetManager.h"
-#include "System/PGSingleton.h"
+#include "System/PGProjectSettings.h"
+#include "Sound/SoundBase.h"
 
 UPGEffectSubsystem* UPGEffectSubsystem::Get()
 {
-	return UPGSingleton::Get().GetGameInstanceSubsystem<UPGEffectSubsystem>();
+	return UPGGameGlobals::Get().GetGameInstanceSubsystem<UPGEffectSubsystem>();
 }
 
-APGEffectorEmitter* UPGEffectSubsystem::PopEffectEmitter(const TSoftObjectPtr<UPGEffectSetData>& SoftEffectSet)
+UNiagaraSystem* UPGEffectSubsystem::FindOrLoadNiagaraSystem(const TSoftObjectPtr<UNiagaraSystem>& SoftNiagaraSystem)
 {
-	APGEffectorEmitter* Emitter = nullptr;
-	if (EmitterPool.Dequeue(Emitter))
+	const auto* NiagaraSystem = VisualFXMap.Find(SoftNiagaraSystem.ToSoftObjectPath());
+	if (NiagaraSystem != nullptr)
 	{
-		check(Emitter);
-
-		const auto* EffectSet = FindOrLoadEffectSet(SoftEffectSet);
-		check(EffectSet);
-
-		Emitter->SetVisualEffect(EffectSet->GetVisualFX());
-		Emitter->SetSoundEffect(EffectSet->GetSoundFX());
-
-		{
-			FScopeLock Lock(&ActivatedEmittersMutex);
-
-			check(ActivatedEmitters.Find(Emitter) == nullptr);
-			ActivatedEmitters.Add(Emitter);
-		}
-	}
-	else
-	{
-		const auto* Settings = GetDefault<UPGDeveloperSettings>();
-
-		if (Settings != nullptr && Settings->bAddEffectEmittersWhenRunOutOfPool)
-		{
-			static int32 NumNewEmitters = Settings->NumNewEffectEmittersPerFrame;
-			GenerateEffectEmitters(NumNewEmitters);
-		}
+		return *NiagaraSystem;
 	}
 
-	return Emitter;
+	auto* LoadedNiagaraSystem = SoftNiagaraSystem.LoadSynchronous();
+	VisualFXMap.Add(SoftNiagaraSystem.ToSoftObjectPath(), LoadedNiagaraSystem);
+
+	return LoadedNiagaraSystem;
 }
 
-void UPGEffectSubsystem::PushEffectEmitter(APGEffectorEmitter* Emitter)
+USoundBase* UPGEffectSubsystem::FindOrLoadSoundBase(const TSoftObjectPtr<USoundBase>& SoftSoundBase)
 {
+	const auto* SoundBase = SoundFXMap.Find(SoftSoundBase.ToSoftObjectPath());
+	if (SoundBase != nullptr)
 	{
-		FScopeLock Lock(&ActivatedEmittersMutex);
-
-		check(ActivatedEmitters.Find(Emitter) != nullptr);
-		ActivatedEmitters.Remove(Emitter);
+		return *SoundBase;
 	}
 
-	verify(EmitterPool.Enqueue(Emitter));
+	auto* LoadedSoundBase = SoftSoundBase.LoadSynchronous();
+	SoundFXMap.Add(SoftSoundBase.ToSoftObjectPath(), LoadedSoundBase);
+
+	return LoadedSoundBase;
 }
 
 void UPGEffectSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	if (const auto* Settings = GetDefault<UPGDeveloperSettings>())
+	AsyncLoadVisualSoundEffects();
+}
+
+void UPGEffectSubsystem::AsyncLoadVisualSoundEffects()
+{
+	const auto* Settings = GetDefault<UPGProjectSettings>();
+	if (Settings == nullptr)
 	{
-		GenerateEffectEmitters(Settings->InitialEffectEmitterPoolSize);
+		return;
+	}
 
-		const auto& AssetRegistry = UPGAssetManager::Get().GetAssetRegistry();
+	const auto& AssetRegistry = UPGAssetManager::Get().GetAssetRegistry();
 
-		FARFilter Filter;
-		Filter.ClassPaths.AddUnique({TEXT("/Script/PlanetGuardian"), TEXT("PGEffectSetData")});
-		Filter.bRecursivePaths = true;
-		Filter.PackagePaths.Add(*Settings->EffectSetDataPath.Path);
+	FTopLevelAssetPath NiagaraAssetPath { TEXT("/Script/Niagara"), TEXT("NiagaraSystem") };
+	FTopLevelAssetPath SoundAssetPath { TEXT("/Script/Engine"), TEXT("SoundBase") };
 
-		TArray<FAssetData> EffectSetData;
+	FARFilter Filter;
+	Filter.ClassPaths.AddUnique(MoveTemp(NiagaraAssetPath));
+	Filter.ClassPaths.AddUnique(MoveTemp(SoundAssetPath));
+	Filter.bRecursivePaths = true;
+	Filter.PackagePaths.Add(*Settings->PlayEffectPath.Path);
 
-		AssetRegistry.GetAssets(Filter, EffectSetData);
-		TArray<FSoftObjectPath> EffectsToStream;
+	TArray<FAssetData> StreamableEffectData;
 
-		for (const auto& Data : EffectSetData)
+	AssetRegistry.GetAssets(Filter, StreamableEffectData);
+	TArray<FSoftObjectPath> EffectsToStream;
+
+	for (const auto& Data : StreamableEffectData)
+	{
+		EffectsToStream.AddUnique(Data.GetSoftObjectPath());
+	}
+
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+
+	auto Delegate = FStreamableDelegate::CreateUObject(this, &UPGEffectSubsystem::OnAsyncLoadVisualSoundEffectsComplete,
+													   MoveTemp(StreamableEffectData));
+
+	Streamable.RequestAsyncLoad(MoveTemp(EffectsToStream), MoveTemp(Delegate));
+}
+
+void UPGEffectSubsystem::OnAsyncLoadVisualSoundEffectsComplete(TArray<FAssetData> LoadedEffectData)
+{
+	TMap<FSoftObjectPath, UNiagaraSystem*> LoadedNiagaraSystems;
+	TMap<FSoftObjectPath, USoundBase*> LoadedSounds;
+
+	for (const auto& Data : LoadedEffectData)
+	{
+		auto* Effect = Data.GetAsset();
+		check(Effect != nullptr);
+
+		if (Effect->IsA(USoundBase::StaticClass()))
 		{
-			EffectsToStream.AddUnique(Data.GetSoftObjectPath());
+			if (auto* SoundBase = Cast<USoundBase>(Effect))
+			{
+				LoadedSounds.Add(Data.GetSoftObjectPath(), SoundBase);
+			}
 		}
-
-		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-		auto Delegate = FStreamableDelegate::CreateUObject(this, &UPGEffectSubsystem::OnInitialEffectsLoaded);
-
-		Streamable.RequestAsyncLoad(MoveTemp(EffectsToStream), MoveTemp(Delegate));
-	}
-}
-
-void UPGEffectSubsystem::GenerateEffectEmitters(const int32 NumEmitters)
-{
-	for (int32 i = 0; i < NumEmitters; ++i)
-	{
-		APGEffectorEmitter* Emitter = Cast<APGEffectorEmitter>(
-			GetWorld()->SpawnActor(APGEffectorEmitter::StaticClass()));
-		check(Emitter);
-
-		verify(EmitterPool.Enqueue(Emitter));
-		AllEffectEmitters.Add(Emitter);
+		else if (Effect->IsA(UNiagaraSystem::StaticClass()))
+		{
+			if (auto* NiagaraSystem = Cast<UNiagaraSystem>(Effect))
+			{
+				LoadedNiagaraSystems.Add(Data.GetSoftObjectPath(), NiagaraSystem);
+			}
+		}
+		else
+		{
+			checkNoEntry();
+		}
 	}
 
-	EmitterPoolSize += NumEmitters;
+	auto* EffectSubsystem = UPGEffectSubsystem::Get();
+	check(EffectSubsystem);
 
-	UE_LOG(LogTemp, Warning, TEXT("UPGEffectSubsystem::GenerateEffectEmitters: Current Emitter Pool Size: %d"), EmitterPoolSize);
-}
-
-const UPGEffectSetData* UPGEffectSubsystem::FindOrLoadEffectSet(const TSoftObjectPtr<UPGEffectSetData>& SoftEffectSet)
-{
-	if (const auto* Found = EffectSetMap.Find(SoftEffectSet.Get()))
-	{
-		return *Found;
-	}
-
-	const auto* LoadedEffectSet = SoftEffectSet.LoadSynchronous();
-	EffectSetMap.Add(SoftEffectSet.ToSoftObjectPath(), LoadedEffectSet);
-
-	return LoadedEffectSet;
-}
-
-void UPGEffectSubsystem::OnInitialEffectsLoaded()
-{
-	const auto& AssetManager = UAssetManager::Get();
-
-	TArray<UObject*> LoadedEffects;
-	AssetManager.GetPrimaryAssetObjectList(UPGEffectSetData::GetPrimaryAssetType(), LoadedEffects);
-
-	for (const auto* LoadedEffect : LoadedEffects)
-	{
-		const auto* EffectSetData = Cast<UPGEffectSetData>(LoadedEffect);
-		check(EffectSetData);
-
-		const auto SoftPath = AssetManager.GetPrimaryAssetPath(EffectSetData->GetPrimaryAssetId());
-
-		EffectSetMap.Add(SoftPath, EffectSetData);
-	}
+	VisualFXMap.Append(MoveTemp(LoadedNiagaraSystems));
+	SoundFXMap.Append(MoveTemp(LoadedSounds));
 }

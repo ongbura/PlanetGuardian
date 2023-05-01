@@ -28,8 +28,8 @@ void APGPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	InputBindingComponent->BindInputActionByTag(GNativeTags.Input_Action_Move, ETriggerEvent::Triggered, this, &ThisClass::Move);
-	InputBindingComponent->BindInputActionByTag(GNativeTags.Input_Action_Look, ETriggerEvent::Triggered, this, &ThisClass::Look);
+	InputBindingComponent->BindMoveAction(ETriggerEvent::Triggered, this, &ThisClass::Move);
+	InputBindingComponent->BindLookAction(ETriggerEvent::Triggered, this, &ThisClass::Look);
 }
 
 void APGPlayableCharacter::PossessedBy(AController* NewController)

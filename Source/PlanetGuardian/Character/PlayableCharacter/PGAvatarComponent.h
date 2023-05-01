@@ -14,7 +14,7 @@ class PLANETGUARDIAN_API UPGAvatarComponent : public UPGPawnAssistantComponent
 {
 	GENERATED_BODY()
 
-	DECLARE_EVENT(UPGAvatarComponent, FOnAbilitySystemInitialized)
+	DECLARE_EVENT_OneParam(UPGAvatarComponent, FOnAbilitySystemInitialized, UPGAbilitySystemComponent* /* InASC */)
 	DECLARE_EVENT(UPGAvatarComponent, FOnAbilitySystemUninitalized)
 	DECLARE_EVENT_OneParam(UPGAvatarComponent, FOnControllerAssigned, APGPlayerController* /* InController */)
 

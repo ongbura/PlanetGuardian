@@ -13,4 +13,6 @@ class PLANETGUARDIAN_API UPGWorldSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
+protected:
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override { return false; }
 };

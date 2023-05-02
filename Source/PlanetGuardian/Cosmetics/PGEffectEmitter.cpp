@@ -5,7 +5,9 @@
 #include "NiagaraComponent.h"
 #include "PGEffectEmitterPool.h"
 #include "Components/AudioComponent.h"
+#include "FeedBack/PGEffectSettings.h"
 #include "Subsystem/PGActorPoolSubsystem.h"
+#include "Subsystem/PGEffectSubsystem.h"
 #include "ThirdParty/MagicEnum/magic_enum.hpp"
 
 // Sets default values
@@ -43,6 +45,48 @@ void APGEffectEmitter::Activate(USkeletalMeshComponent* TargetMesh, const FName&
 	Activate();
 }
 
+void APGEffectEmitter::SetVisualEffectSettings(const FPGEffectSettings_VFX& VisualFXSettings)
+{
+	auto* EffectSubsystem = UPGEffectSubsystem::Get();
+	if (EffectSubsystem == nullptr)
+	{
+		return;
+	}
+
+	if (auto* NiagaraSystem = EffectSubsystem->FindOrLoadNiagaraSystem(VisualFXSettings.NiagaraFX))
+	{
+		AddActorLocalOffset(VisualFXSettings.LocationOffset);
+		AddActorLocalRotation(VisualFXSettings.RotationOffset);
+		SetActorScale3D(VisualFXSettings.Scale);
+		
+		VisualFX->SetAsset(NiagaraSystem);
+		bSetVisualFX = true;
+	}
+}
+
+void APGEffectEmitter::SetSoundEffectSettings(const FPGEffectSettings_SFX& SoundFXSettings)
+{
+	auto* EffectSubsystem = UPGEffectSubsystem::Get();
+	if (EffectSubsystem == nullptr)
+	{
+		return;
+	}
+
+	if (auto* Sound = EffectSubsystem->FindOrLoadSoundBase(SoundFXSettings.SoundFX))
+	{
+		SoundFX->VolumeMultiplier = SoundFXSettings.VolumeMultiplier;
+		SoundFX->PitchMultiplier = SoundFXSettings.PitchMultiplier;
+		
+		SoundFX->SetSound(Sound);
+		bSetSoundFX = true;
+	}
+}
+
+void APGEffectEmitter::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void APGEffectEmitter::Activate()
 {
 	const int32 ModeFlag = static_cast<int32>(bSetVisualFX) | static_cast<int32>(bSetSoundFX << 1);
@@ -68,8 +112,6 @@ void APGEffectEmitter::Activate()
 		}
 
 		bActivated = true;
-
-		UE_LOG(LogTemp, Warning, TEXT("%s Activated!"), *GetName());
 	}
 	else
 	{
@@ -86,7 +128,7 @@ void APGEffectEmitter::ResetEffectEmitter()
 
 	if (bSetVisualFX)
 	{
-		VisualFX->SetAsset(nullptr);
+		VisualFX->Deactivate();
 		VisualFX->OnSystemFinished.RemoveAll(this);
 		bSetVisualFX = false;
 	}
@@ -110,36 +152,9 @@ void APGEffectEmitter::ResetEffectEmitter()
 
 	SetActorHiddenInGame(true);
 	SetActorTickEnabled(false);
-
-	UE_LOG(LogTemp, Warning, TEXT("%s Dectivated!"), *GetName());
 }
 
-void APGEffectEmitter::SetVisualEffect(UNiagaraSystem* VisualFXSystem)
-{
-	check(VisualFX->GetAsset() == nullptr);
 
-	if (VisualFXSystem != nullptr)
-	{
-		VisualFX->SetAsset(VisualFXSystem);
-		bSetVisualFX = true;
-	}
-}
-
-void APGEffectEmitter::SetSoundEffect(USoundBase* SoundFXSystem)
-{
-	check(SoundFX->Sound == nullptr);
-
-	if (SoundFXSystem != nullptr)
-	{
-		SoundFX->Sound = SoundFXSystem;
-		bSetSoundFX = true;
-	}
-}
-
-void APGEffectEmitter::BeginPlay()
-{
-	Super::BeginPlay();
-}
 
 void APGEffectEmitter::OnEndEmissionVisualFX(UNiagaraComponent* PSystem)
 {

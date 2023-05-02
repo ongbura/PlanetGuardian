@@ -6,7 +6,7 @@
 #include "Engine/DeveloperSettings.h"
 #include "PGProjectSettings.generated.h"
 
-#define DEFAULT_NEW_EFFECT_EMITTERS (16)
+#define DEFAULT_NEW_EFFECT_EMITTERS (8)
 
 class UPGInputActionAbilityData;
 class UPGEffectSetData;

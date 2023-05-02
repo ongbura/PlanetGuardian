@@ -2,6 +2,7 @@
 "Ability.Crouch",""
 "Ability.Jump",""
 "Attribute.Common.Health",""
-"Input.Action.Look",""
-Input.Action.Move,""
-Input.Action.Jump,
+"Movement.Mode.Falling",""
+"Movement.Mode.Flying",
+"Movement.Mode.NavWalking",""
+"Movement.Mode.Walking",

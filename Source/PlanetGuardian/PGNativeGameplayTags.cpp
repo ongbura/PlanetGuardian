@@ -16,10 +16,11 @@ void FPGNativeGameplayTags::AddTags()
 	// Attribute.Common
 	Attribute_Common_Health = GameplayTagsManager.AddNativeGameplayTag("Attribute.Common.Health");
 	
-	// Input.Action
-	Input_Action_Jump = GameplayTagsManager.AddNativeGameplayTag("Input.Action.Jump");
-	Input_Action_Look = GameplayTagsManager.AddNativeGameplayTag("Input.Action.Look");
-	Input_Action_Move = GameplayTagsManager.AddNativeGameplayTag("Input.Action.Move");
+	// Movement.Mode
+	Movement_Mode_Falling = GameplayTagsManager.AddNativeGameplayTag("Movement.Mode.Falling");
+	Movement_Mode_Flying = GameplayTagsManager.AddNativeGameplayTag("Movement.Mode.Flying");
+	Movement_Mode_NavWalking = GameplayTagsManager.AddNativeGameplayTag("Movement.Mode.NavWalking");
+	Movement_Mode_Walking = GameplayTagsManager.AddNativeGameplayTag("Movement.Mode.Walking");
 
     GameplayTagsManager.OnLastChanceToAddNativeTags().RemoveAll(this);
 }

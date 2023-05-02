@@ -5,26 +5,11 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "GameplayTagContainer.h"
+#include "AbilitySystem/PGGameplayAbility.h"
 #include "PGInputActionAbilitySet.generated.h"
 
 class UInputAction;
 class UPGGameplayAbility;
-
-USTRUCT()
-struct FPGInputActionAbilitySet
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UInputAction> InputAction;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSoftClassPtr<UPGGameplayAbility> AbilityClass;
-	
-	UInputAction* LoadInputAction() const;
-
-	UPGGameplayAbility* LoadGameplayAbility() const;
-};
 
 UCLASS()
 class PLANETGUARDIAN_API UPGInputActionAbilityData : public UDataAsset
@@ -32,8 +17,24 @@ class PLANETGUARDIAN_API UPGInputActionAbilityData : public UDataAsset
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, meta=(AllowPrivateAccess="true"))
-	TArray<FPGInputActionAbilitySet> InputActionAbilityData;
+	TMap<TSoftObjectPtr<UInputAction>, TSoftClassPtr<UPGGameplayAbility>> InputActionAbilityMap;
 	
 public:
-	const auto& GetInputActionAbilityData() const { return InputActionAbilityData; }
+	const auto& GetInputActionAbilityMap() const { return InputActionAbilityMap; }
+
+	template <typename FuncType>
+	void ForEachLoadedInputActionAbilitySet(FuncType Func) const;
+	
 };
+
+template <typename FuncType>
+void UPGInputActionAbilityData::ForEachLoadedInputActionAbilitySet(FuncType Func) const
+{
+	for (const auto& InputActionAbilityPair : InputActionAbilityMap)
+	{
+		auto* InputAction = InputActionAbilityPair.Key.LoadSynchronous();
+		auto* Ability = Cast<UPGGameplayAbility>(InputActionAbilityPair.Value.LoadSynchronous()->GetDefaultObject());
+
+		Func(InputAction, Ability);
+	}
+}

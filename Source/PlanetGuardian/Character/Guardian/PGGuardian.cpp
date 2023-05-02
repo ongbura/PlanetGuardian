@@ -5,18 +5,21 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "NiagaraComponent.h"
+#include "PGGuardianMovementComponent.h"
 #include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
-APGGuardian::APGGuardian()
-	: CameraBoom(CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom")))
+APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPGGuardianMovementComponent>(CharacterMovementComponentName))
+	, CameraBoom(CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom")))
 	, FollowCamera(CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera")))
 	, Jetpack(CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Jetpack")))
 	, JetpackEffect(CreateDefaultSubobject<UNiagaraComponent>(TEXT("JetpackEffect")))
 	, JetpackSoundEffect(CreateDefaultSubobject<UAudioComponent>(TEXT("JetpackSound")))
 {
-	PrimaryActorTick.bCanEverTick = true;
+	GuardianMovementComponent = Cast<UPGGuardianMovementComponent>(GetCharacterMovement());
+	GuardianMovementComponent->SetIsReplicated(true);
 
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 350.f;

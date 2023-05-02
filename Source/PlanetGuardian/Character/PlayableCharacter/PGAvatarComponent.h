@@ -7,6 +7,8 @@
 #include "Controller/PlayerController/PGPlayerController.h"
 #include "PGAvatarComponent.generated.h"
 
+class UGameplayEffect;
+class UPGGameplayAbility;
 class UPGAbilitySystemComponent;
 
 UCLASS(meta=(BlueprintSpawnableComponent))
@@ -28,7 +30,13 @@ private:
 	bool bPlayerStateAssigned;
 	bool bSpawnedCompletely;
 	
-	TWeakObjectPtr<UPGAbilitySystemComponent> AbilitySystemComponent;	
+	TWeakObjectPtr<UPGAbilitySystemComponent> AbilitySystemComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	TArray<TSubclassOf<UPGGameplayAbility>> DefaultAbilities;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
 
 public:
 	UPGAvatarComponent();
@@ -42,10 +50,17 @@ public:
 	void HandlePlayerControllerAssigned();
 
 	void HandlePlayerStateAssigned();
+
+	UFUNCTION(Server, Reliable)
+	void GrantDefaultAbilitiesAndApplyStartupEffects();
 	
 protected:
 	virtual void BeginPlay() override;
 	
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+private:
+	void GrantDefaultAbilities();
+
+	void ApplyStartupEffects();	
 };

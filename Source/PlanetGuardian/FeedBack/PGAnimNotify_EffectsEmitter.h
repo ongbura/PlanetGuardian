@@ -14,11 +14,6 @@ class PLANETGUARDIAN_API UPGAnimNotify_EffectsEmitter : public UAnimNotify
 {
 	GENERATED_BODY()
 
-#if WITH_EDITORONLY_DATA
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	TObjectPtr<USkeleton> Skeleton;
-#endif
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FString NotifyDisplayName;
 
@@ -43,10 +38,6 @@ class PLANETGUARDIAN_API UPGAnimNotify_EffectsEmitter : public UAnimNotify
 
 protected:
 	virtual FString GetNotifyName_Implementation() const override;
-
-#if WITH_EDITOR
-	virtual bool CanBePlaced(UAnimSequenceBase* Animation) const override;
-#endif
 	
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	                    const FAnimNotifyEventReference& EventReference) override;

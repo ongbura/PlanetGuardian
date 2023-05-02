@@ -6,6 +6,7 @@
 #include "Character/PlayableCharacter/PGPlayableCharacter.h"
 #include "PGGuardian.generated.h"
 
+class UPGGuardianMovementComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UNiagaraComponent;
@@ -18,6 +19,9 @@ UCLASS()
 class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
 {
 	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Movement", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UPGGuardianMovementComponent> GuardianMovementComponent;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Camera", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<USpringArmComponent> CameraBoom;
@@ -47,7 +51,7 @@ class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
 	float ThrusterMaxTime{ 2.f};
 
 public:
-	APGGuardian();
+	explicit APGGuardian(const FObjectInitializer& ObjectInitializer);
 	
 	/**
 	 * @brief The jetpack can be started, stopped and reset here.

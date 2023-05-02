@@ -25,7 +25,7 @@ protected:
 	TObjectPtr<UPGInputBindingComponent> InputBindingComponent;
 
 public:
-	APGPlayableCharacter();
+	APGPlayableCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual bool IsAlive() const PURE_VIRTUAL(APGCharacter::IsAlive, return false;)
 

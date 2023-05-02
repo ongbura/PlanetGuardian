@@ -7,7 +7,6 @@
 #include "Cosmetics/PGEffectEmitterPool.h"
 #include "Kismet/GameplayStatics.h"
 #include "Subsystem/PGActorPoolSubsystem.h"
-#include "Subsystem/PGEffectSubsystem.h"
 
 FString UPGAnimNotify_EffectsEmitter::GetNotifyName_Implementation() const
 {
@@ -18,28 +17,6 @@ FString UPGAnimNotify_EffectsEmitter::GetNotifyName_Implementation() const
 
 	return NotifyDisplayName;
 }
-
-#if WITH_EDITOR
-bool UPGAnimNotify_EffectsEmitter::CanBePlaced(UAnimSequenceBase* Animation) const
-{
-	if (Animation == nullptr)
-	{
-		return false;
-	}
-
-	if (Skeleton == nullptr)
-	{
-		return false;
-	}
-
-	if (Skeleton != Animation->GetSkeleton())
-	{
-		return false;
-	}
-
-	return true;
-}
-#endif
 
 void UPGAnimNotify_EffectsEmitter::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                           const FAnimNotifyEventReference& EventReference)
@@ -62,18 +39,12 @@ void UPGAnimNotify_EffectsEmitter::Notify(USkeletalMeshComponent* MeshComp, UAni
 
 		return;
 	}
-
-	auto* EffectSubsystem = World->GetGameInstance()->GetSubsystem<UPGEffectSubsystem>();
-	if (EffectSubsystem == nullptr)
-	{
-		return;
-	}
-
+	
 	auto* Emitter = PoolSubsystem->GetEffectEmitterPool()->PopEffectEmitter();
 	check(Emitter);
 
-	Emitter->SetVisualEffect(EffectSubsystem->FindOrLoadNiagaraSystem(VFXSettings.NiagaraFX));
-	Emitter->SetSoundEffect(EffectSubsystem->FindOrLoadSoundBase(SFXSettings.SoundFX));
+	Emitter->SetVisualEffectSettings(VFXSettings);
+	Emitter->SetSoundEffectSettings(SFXSettings);
 
 	if (bShouldAttached)
 	{

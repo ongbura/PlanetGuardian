@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "PGEffectEmitter.generated.h"
 
+struct FPGEffectSettings_SFX;
+struct FPGEffectSettings_VFX;
 class UNiagaraComponent;
 class UNiagaraSystem;
 class UAudioComponent;
@@ -55,9 +57,9 @@ public:
 
 	void Activate(USkeletalMeshComponent* TargetMesh, const FName& SocketName);
 
-	void SetVisualEffect(UNiagaraSystem* VisualFXSystem);
+	void SetVisualEffectSettings(const FPGEffectSettings_VFX& VisualFXSettings);
 
-	void SetSoundEffect(USoundBase* SoundFXSystem);
+	void SetSoundEffectSettings(const FPGEffectSettings_SFX& SoundFXSettings);
 	
 protected:
 	virtual void BeginPlay() override;

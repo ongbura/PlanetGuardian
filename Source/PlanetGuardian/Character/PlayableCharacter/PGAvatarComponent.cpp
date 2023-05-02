@@ -4,6 +4,7 @@
 #include "PGAvatarComponent.h"
 #include "AbilitySystem/PGAbilitySystemComponent.h"
 #include "Multiplayer/PGPlayerState.h"
+#include "AbilitySystem/PGGameplayAbility.h"
 
 UPGAvatarComponent::UPGAvatarComponent()
 {
@@ -57,22 +58,6 @@ void UPGAvatarComponent::UninitializeAbilitySystem()
 	OnAbilitySystemUninitialized.Broadcast();
 }
 
-// Called when the game starts
-void UPGAvatarComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// ...
-	
-}
-
-void UPGAvatarComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	UninitializeAbilitySystem();
-	
-	Super::EndPlay(EndPlayReason);
-}
-
 void UPGAvatarComponent::HandlePlayerControllerAssigned()
 {
 	if (AbilitySystemComponent.IsValid() && AbilitySystemComponent->GetAvatarActor() == GetPawnChecked<APawn>())
@@ -88,7 +73,7 @@ void UPGAvatarComponent::HandlePlayerControllerAssigned()
 			AbilitySystemComponent->RefreshAbilityActorInfo();
 		}
 	}
-	
+
 	bControllerAssigned = true;
 
 	OnPlayerControllerAssigned.Broadcast(GetController<APGPlayerController>());
@@ -107,8 +92,72 @@ void UPGAvatarComponent::HandlePlayerStateAssigned()
 			InitializeAbilitySystem(PS->GetPGAbilitySystemComponent(), PS);
 		}
 	}
-	
+
 	bPlayerStateAssigned = true;
 }
 
+void UPGAvatarComponent::GrantDefaultAbilitiesAndApplyStartupEffects_Implementation()
+{
+	GrantDefaultAbilities();
+	ApplyStartupEffects();
+}
 
+// Called when the game starts
+void UPGAvatarComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// ...
+}
+
+void UPGAvatarComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UninitializeAbilitySystem();
+
+	Super::EndPlay(EndPlayReason);
+}
+
+void UPGAvatarComponent::GrantDefaultAbilities()
+{
+	if (DefaultAbilities.Num() == 0)
+	{
+		return;
+	}
+
+	if (!GetOwner()->HasAuthority() || !AbilitySystemComponent.IsValid())
+	{
+		return;
+	}
+
+	for (const auto& Ability : DefaultAbilities)
+	{
+		// note: Return value(FGameplayAbilitySpecHandle) is not used.
+		AbilitySystemComponent->GiveAbility({ Ability });
+	}
+}
+
+void UPGAvatarComponent::ApplyStartupEffects()
+{
+	if (StartupEffects.Num() == 0)
+	{
+		return;
+	}
+
+	if (!GetOwner()->HasAuthority() || !AbilitySystemComponent.IsValid())
+	{
+		return;
+	}
+
+	auto AvatarEffectContext = AbilitySystemComponent->MakeEffectContext();
+	AvatarEffectContext.AddSourceObject(this);
+
+	for (const auto& Effect : StartupEffects)
+	{
+		auto Handle = AbilitySystemComponent->MakeOutgoingSpec(Effect, DEFAULT_ABILITY_LEVEL, AvatarEffectContext);
+		if (Handle.IsValid())
+		{
+			// note: Return value(FActiveGameplayEffectHandle) is not used.
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Handle.Data.Get());
+		}
+	}
+}

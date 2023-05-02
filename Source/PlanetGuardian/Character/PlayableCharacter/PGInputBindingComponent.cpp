@@ -131,19 +131,27 @@ void UPGInputBindingComponent::InitializeComponent()
 		return;
 	}
 
-	for (const auto& [InputAction, AbilityClass] : LoadedData->GetInputActionAbilityData())
+	LoadedData->ForEachLoadedInputActionAbilitySet([this](UInputAction* InputAction, UPGGameplayAbility* Ability)
 	{
-		auto* LoadedInputAction = InputAction.LoadSynchronous();
-		check(LoadedInputAction);
-
-		auto* AbilityCDO = Cast<UGameplayAbility>(AbilityClass.LoadSynchronous()->GetDefaultObject());
-		check(AbilityCDO);
-		
 		FPGAbilityBindingInfo AbilityBindingInfo;
-		AbilityBindingInfo.InputAction = LoadedInputAction;
+		AbilityBindingInfo.InputAction = InputAction;
 
-		AbilityBindingInfos.Add(AbilityCDO, AbilityBindingInfo);
-	}
+		AbilityBindingInfos.Add(Ability, AbilityBindingInfo);
+	});
+
+	// for (const auto& [InputAction, AbilityClass] : LoadedData->GetInputActionAbilityData())
+	// {
+	// 	auto* LoadedInputAction = InputAction.LoadSynchronous();
+	// 	check(LoadedInputAction);
+	//
+	// 	auto* AbilityCDO = Cast<UGameplayAbility>(AbilityClass.LoadSynchronous()->GetDefaultObject());
+	// 	check(AbilityCDO);
+	// 	
+	// 	FPGAbilityBindingInfo AbilityBindingInfo;
+	// 	AbilityBindingInfo.InputAction = LoadedInputAction;
+	//
+	// 	AbilityBindingInfos.Add(AbilityCDO, AbilityBindingInfo);
+	// }
 }
 
 void UPGInputBindingComponent::OnAbilityInputPressed(FGameplayAbilitySpecHandle SpecHandle)

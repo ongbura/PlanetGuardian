@@ -8,7 +8,8 @@
 #include "AbilitySystem/PGAbilitySystemComponent.h"
 #include "Multiplayer/PGPlayerState.h"
 
-APGPlayableCharacter::APGPlayableCharacter()
+APGPlayableCharacter::APGPlayableCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	AvatarComponent = CreateDefaultSubobject<UPGAvatarComponent>(TEXT("AvaterComponent"));
 	InputBindingComponent = CreateDefaultSubobject<UPGInputBindingComponent>(TEXT("InputBindingComponent"));
@@ -45,7 +46,9 @@ void APGPlayableCharacter::PossessedBy(AController* NewController)
 		if (GetNetMode() != NM_DedicatedServer && IsLocallyControlled())
 		{
 			AvatarComponent->HandlePlayerControllerAssigned();
+			AvatarComponent->GrantDefaultAbilitiesAndApplyStartupEffects();
 		}
+
 		
 		// Some games grant attributes and abilities here
 
@@ -58,6 +61,7 @@ void APGPlayableCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 
 	AvatarComponent->HandlePlayerStateAssigned();
+	AvatarComponent->GrantDefaultAbilitiesAndApplyStartupEffects();
 }
 
 void APGPlayableCharacter::OnRep_Controller()

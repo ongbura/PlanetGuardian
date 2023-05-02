@@ -16,10 +16,11 @@ static struct FPGNativeGameplayTags : FGameplayTagNativeAdder
 	// Attribute.Common
 	FGameplayTag Attribute_Common_Health{};
 	
-	// Input.Action
-	FGameplayTag Input_Action_Jump{};
-	FGameplayTag Input_Action_Look{};
-	FGameplayTag Input_Action_Move{};
+	// Movement.Mode
+	FGameplayTag Movement_Mode_Falling{};
+	FGameplayTag Movement_Mode_Flying{};
+	FGameplayTag Movement_Mode_NavWalking{};
+	FGameplayTag Movement_Mode_Walking{};
 
     virtual void AddTags() override;
 } GNativeTags;

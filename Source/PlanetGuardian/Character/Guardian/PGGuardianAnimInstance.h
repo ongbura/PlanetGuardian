@@ -11,46 +11,12 @@ class UCharacterMovementComponent;
 class UCapsuleComponent;
 class UPGCameraShake;
 
-USTRUCT()
-struct FPGGuardianAnimInstanceProxy : public FAnimInstanceProxy
-{
-	GENERATED_BODY()
-
-	TWeakObjectPtr<UCapsuleComponent> CapsuleComp{ nullptr };
-	TWeakObjectPtr<UCharacterMovementComponent> MovementComp{ nullptr };
-
-	float Speed{ 0.f };
-	bool bIsMoving{ false };
-	bool bIsAccelerating{ false };
-	bool bIsInAir{ false };
-	bool bIsCrouching{ false };
-	float Direction{ 0.f };
-	FRotator PreviousRotation{ 0.f };
-	float LeanAmount{ 0.f };
-	bool bIsHovering{ false };
-	FVector InteractWorldLocation{ 0.f };
-	bool bIsInactive{ false };
-
-	FPGGuardianAnimInstanceProxy() = default;
-
-	explicit FPGGuardianAnimInstanceProxy(UAnimInstance* InAnimInstance);
-
-	virtual void InitializeObjects(UAnimInstance* InAnimInstance) override;
-
-	virtual void PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds) override;
-
-	virtual void Update(float DeltaSeconds) override;
-
-	virtual void PostUpdate(UAnimInstance* InAnimInstance) const override;
-
-	void CalculateLeanAmount(const FRotator& InCurrentRotation, float DeltaSeconds);
-};
-
 UCLASS()
-class PLANETGUARDIAN_API UPGGuardianAnimInstance : public UAnimInstance
+class UPGGuardianAnimData : public UObject
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	float GroundSpeed;
 
@@ -82,13 +48,52 @@ class PLANETGUARDIAN_API UPGGuardianAnimInstance : public UAnimInstance
 	FVector InteractWorldLocation;
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	bool bIsInactive;
+	bool bIsInactive;	
+};
+
+USTRUCT()
+struct FPGGuardianAnimInstanceProxy : public FAnimInstanceProxy
+{
+	GENERATED_BODY()
+
+	TWeakObjectPtr<UCapsuleComponent> CapsuleComp { nullptr };
+	
+	TWeakObjectPtr<UCharacterMovementComponent> MovementComp { nullptr };
+
+	TWeakObjectPtr<class UPGGuardianAnimInstance> AnimInstance { nullptr };
+
+	FPGGuardianAnimInstanceProxy() = default;
+
+	explicit FPGGuardianAnimInstanceProxy(UAnimInstance* InAnimInstance);
+
+	virtual void InitializeObjects(UAnimInstance* InAnimInstance) override;
+
+	virtual void PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds) override;
+
+	virtual void Update(float DeltaSeconds) override;
+
+	virtual void PostUpdate(UAnimInstance* InAnimInstance) const override;
+
+	void CalculateLeanAmount(UPGGuardianAnimData* Data, const FRotator& InCurrentRotation, float DeltaSeconds);
+};
+
+UCLASS()
+class PLANETGUARDIAN_API UPGGuardianAnimInstance : public UAnimInstance
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	UPGGuardianAnimData* BackAnimData;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	UPGGuardianAnimData* AnimData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	TSubclassOf<UPGCameraShake> CameraShake;
 
 protected:
 	virtual void NativeInitializeAnimation() override;
+
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
 
 private:
@@ -97,4 +102,6 @@ private:
 
 private:
 	friend void FPGGuardianAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const;
+
+	friend struct FPGGuardianAnimInstanceProxy;
 };

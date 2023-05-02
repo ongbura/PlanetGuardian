@@ -2,7 +2,6 @@
 
 
 #include "PGGuardianAnimInstance.h"
-
 #include "Camera/PGCameraShake.h"
 #include "GameFramework/Character.h"
 #include "Components/CapsuleComponent.h"
@@ -39,6 +38,7 @@ float CalculateDirection(const FVector& Velocity, const FRotator& BaseRotation)
 FPGGuardianAnimInstanceProxy::FPGGuardianAnimInstanceProxy(UAnimInstance* InAnimInstance)
 	: Super(InAnimInstance)
 {
+	AnimInstance = CastChecked<UPGGuardianAnimInstance>(InAnimInstance);
 }
 
 void FPGGuardianAnimInstanceProxy::InitializeObjects(UAnimInstance* InAnimInstance)
@@ -61,6 +61,8 @@ void FPGGuardianAnimInstanceProxy::Update(float DeltaSeconds)
 {
 	FAnimInstanceProxy::Update(DeltaSeconds);
 
+	auto* Data = AnimInstance->BackAnimData;
+
 	if (!MovementComp.IsValid() || !CapsuleComp.IsValid())
 	{
 		return;
@@ -68,17 +70,17 @@ void FPGGuardianAnimInstanceProxy::Update(float DeltaSeconds)
 
 	const FVector GroundVelocity{ MovementComp->Velocity.X, MovementComp->Velocity.Y, 0.f };
 
-	Speed = GroundVelocity.Length();
+	Data->GroundSpeed = GroundVelocity.Length();
 
 	constexpr static float MovingTolerance{ 5.f };
-	bIsMoving = Speed > MovingTolerance ? true : false;
+	Data->bIsMoving = Data->GroundSpeed > MovingTolerance ? true : false;
 
-	bIsInAir = MovementComp->IsFalling();
-	bIsAccelerating = MovementComp->GetCurrentAcceleration().IsNearlyZero() ? false : true;
-	bIsCrouching = MovementComp->IsCrouching();
-	Direction = CalculateDirection(MovementComp->Velocity, CapsuleComp->GetComponentRotation());
+	Data->bIsInAir = MovementComp->IsFalling();
+	Data->bIsAccelerating = MovementComp->GetCurrentAcceleration().IsNearlyZero() ? false : true;
+	Data->bIsCrouching = MovementComp->IsCrouching();
+	Data->Direction = CalculateDirection(MovementComp->Velocity, CapsuleComp->GetComponentRotation());
 
-	CalculateLeanAmount(CapsuleComp->GetComponentRotation(), DeltaSeconds);
+	CalculateLeanAmount(Data, CapsuleComp->GetComponentRotation(), DeltaSeconds);
 
 	// TODO: Update bIsHovering, bIsInactive, InteractWorldLocation
 }
@@ -86,29 +88,18 @@ void FPGGuardianAnimInstanceProxy::Update(float DeltaSeconds)
 void FPGGuardianAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 {
 	FAnimInstanceProxy::PostUpdate(InAnimInstance);
-
-	if (auto* const AnimInstance = Cast<UPGGuardianAnimInstance>(InAnimInstance))
-	{
-		AnimInstance->GroundSpeed = Speed;
-		AnimInstance->bIsMoving = bIsMoving;
-		AnimInstance->bIsAccelerating = bIsAccelerating;
-		AnimInstance->bIsInAir = bIsInAir;
-		AnimInstance->bIsCrouching = bIsCrouching;
-		AnimInstance->Direction = Direction;
-		AnimInstance->LeanAmount = LeanAmount;
-		AnimInstance->bIsHovering = bIsHovering;
-		AnimInstance->bIsInactive = bIsInactive;
-		AnimInstance->InteractWorldLocation = InteractWorldLocation;
-		AnimInstance->PreviousRotation = PreviousRotation;
-	}
+	
+	auto* FrontAnimData = AnimInstance->AnimData;
+	AnimInstance->AnimData = AnimInstance->BackAnimData;
+	AnimInstance->BackAnimData = FrontAnimData;
 }
 
-void FPGGuardianAnimInstanceProxy::CalculateLeanAmount(const FRotator& InCurrentRotation, const float DeltaSeconds)
+void FPGGuardianAnimInstanceProxy::CalculateLeanAmount(UPGGuardianAnimData* Data, const FRotator& InCurrentRotation, const float DeltaSeconds)
 {
-	const auto DeltaRotation = (InCurrentRotation - PreviousRotation).GetNormalized();
-	LeanAmount = UKismetMathLibrary::FInterpTo(LeanAmount, DeltaRotation.Yaw, DeltaSeconds, 2.f);
+	const auto DeltaRotation = (InCurrentRotation - Data->PreviousRotation).GetNormalized();
+	Data->LeanAmount = UKismetMathLibrary::FInterpTo(Data->LeanAmount, DeltaRotation.Yaw, DeltaSeconds, 2.f);
 
-	PreviousRotation = InCurrentRotation;
+	Data->PreviousRotation = InCurrentRotation;
 }
 
 void UPGGuardianAnimInstance::NativeInitializeAnimation()
@@ -116,6 +107,9 @@ void UPGGuardianAnimInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	bUseMultiThreadedAnimationUpdate = true;
+
+	AnimData = NewObject<UPGGuardianAnimData>();
+	BackAnimData = NewObject<UPGGuardianAnimData>();
 }
 
 FAnimInstanceProxy* UPGGuardianAnimInstance::CreateAnimInstanceProxy()

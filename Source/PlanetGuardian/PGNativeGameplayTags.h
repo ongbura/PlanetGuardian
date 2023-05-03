@@ -7,20 +7,15 @@
 
 static struct FPGNativeGameplayTags : FGameplayTagNativeAdder
 {
-    // Ability.Crouch
-	FGameplayTag Ability_Crouch{};
-	
-	// Ability.Jump
-	FGameplayTag Ability_Jump{};
+    // Ability.Guardian
+	FGameplayTag Ability_Guardian_Movement_Jump{};
+	FGameplayTag Ability_Guardian_Movement_LaunchJetpack{};
 	
 	// Attribute.Common
 	FGameplayTag Attribute_Common_Health{};
 	
-	// Movement.Mode
-	FGameplayTag Movement_Mode_Falling{};
-	FGameplayTag Movement_Mode_Flying{};
-	FGameplayTag Movement_Mode_NavWalking{};
-	FGameplayTag Movement_Mode_Walking{};
+	// Attribute.Guardian
+	FGameplayTag Attribute_Guardian_Movement{};
 
     virtual void AddTags() override;
 } GNativeTags;

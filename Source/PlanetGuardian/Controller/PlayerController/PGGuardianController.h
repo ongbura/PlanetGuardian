@@ -6,12 +6,12 @@
 #include "PGPlayerController.h"
 #include "PGGuardianController.generated.h"
 
-class UPGInputConfig;
 
 UCLASS()
 class PLANETGUARDIAN_API APGGuardianController : public APGPlayerController
 {
 	GENERATED_BODY()
+
 
 public:
 	APGGuardianController();

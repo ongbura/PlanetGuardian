@@ -7,20 +7,15 @@ void FPGNativeGameplayTags::AddTags()
 {
     auto& GameplayTagsManager = UGameplayTagsManager::Get();
 
-    // Ability.Crouch
-	Ability_Crouch = GameplayTagsManager.AddNativeGameplayTag("Ability.Crouch");
-	
-	// Ability.Jump
-	Ability_Jump = GameplayTagsManager.AddNativeGameplayTag("Ability.Jump");
+    // Ability.Guardian
+	Ability_Guardian_Movement_Jump = GameplayTagsManager.AddNativeGameplayTag("Ability.Guardian.Movement.Jump");
+	Ability_Guardian_Movement_LaunchJetpack = GameplayTagsManager.AddNativeGameplayTag("Ability.Guardian.Movement.LaunchJetpack");
 	
 	// Attribute.Common
 	Attribute_Common_Health = GameplayTagsManager.AddNativeGameplayTag("Attribute.Common.Health");
 	
-	// Movement.Mode
-	Movement_Mode_Falling = GameplayTagsManager.AddNativeGameplayTag("Movement.Mode.Falling");
-	Movement_Mode_Flying = GameplayTagsManager.AddNativeGameplayTag("Movement.Mode.Flying");
-	Movement_Mode_NavWalking = GameplayTagsManager.AddNativeGameplayTag("Movement.Mode.NavWalking");
-	Movement_Mode_Walking = GameplayTagsManager.AddNativeGameplayTag("Movement.Mode.Walking");
+	// Attribute.Guardian
+	Attribute_Guardian_Movement = GameplayTagsManager.AddNativeGameplayTag("Attribute.Guardian.Movement");
 
     GameplayTagsManager.OnLastChanceToAddNativeTags().RemoveAll(this);
 }

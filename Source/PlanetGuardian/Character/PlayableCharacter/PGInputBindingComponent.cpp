@@ -8,7 +8,7 @@
 #include "InputMappingContext.h"
 #include "PGPlayableCharacter.h"
 #include "AbilitySystem/PGAbilitySystemComponent.h"
-#include "AbilitySystem/PGGameplayAbility.h"
+#include "AbilitySystem/Ability/PGGameplayAbility.h"
 #include "DataAsset/PGInputActionAbilitySet.h"
 #include "System/PGProjectSettings.h"
 
@@ -138,20 +138,6 @@ void UPGInputBindingComponent::InitializeComponent()
 
 		AbilityBindingInfos.Add(Ability, AbilityBindingInfo);
 	});
-
-	// for (const auto& [InputAction, AbilityClass] : LoadedData->GetInputActionAbilityData())
-	// {
-	// 	auto* LoadedInputAction = InputAction.LoadSynchronous();
-	// 	check(LoadedInputAction);
-	//
-	// 	auto* AbilityCDO = Cast<UGameplayAbility>(AbilityClass.LoadSynchronous()->GetDefaultObject());
-	// 	check(AbilityCDO);
-	// 	
-	// 	FPGAbilityBindingInfo AbilityBindingInfo;
-	// 	AbilityBindingInfo.InputAction = LoadedInputAction;
-	//
-	// 	AbilityBindingInfos.Add(AbilityCDO, AbilityBindingInfo);
-	// }
 }
 
 void UPGInputBindingComponent::OnAbilityInputPressed(FGameplayAbilitySpecHandle SpecHandle)

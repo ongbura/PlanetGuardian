@@ -4,7 +4,7 @@
 #include "PGAvatarComponent.h"
 #include "AbilitySystem/PGAbilitySystemComponent.h"
 #include "Multiplayer/PGPlayerState.h"
-#include "AbilitySystem/PGGameplayAbility.h"
+#include "AbilitySystem/Ability/PGGameplayAbility.h"
 
 UPGAvatarComponent::UPGAvatarComponent()
 {

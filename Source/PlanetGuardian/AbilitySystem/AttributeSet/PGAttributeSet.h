@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "AttributeSet.h"
-#include "GameplayTagContainer.h"
+#include "AbilitySystemComponent.h"
 #include "PGAttributeSet.generated.h"
+
+DECLARE_MULTICAST_DELEGATE_FourParams(FPGAttributeEvent, AActor* /*EffectInstigator*/, AActor* /*EffectCauser*/, const FGameplayEffectSpec& /*EffectSpec*/, float /*EffectMagnitude*/);
 
 // Uses macros from AttributeSet.h
 #define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \

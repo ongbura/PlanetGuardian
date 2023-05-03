@@ -1,8 +1,5 @@
 "TagName","TagDevComment"
-"Ability.Crouch",""
-"Ability.Jump",""
+"Ability.Guardian.Movement.Jump",""
+"Ability.Guardian.Movement.LaunchJetpack",
 "Attribute.Common.Health",""
-"Movement.Mode.Falling",""
-"Movement.Mode.Flying",
-"Movement.Mode.NavWalking",""
-"Movement.Mode.Walking",
+"Attribute.Guardian.Movement",""

@@ -4,15 +4,27 @@
 #include "PGPlayableCharacter.h"
 #include "PGAvatarComponent.h"
 #include "PGInputBindingComponent.h"
-#include "PGNativeGameplayTags.h"
 #include "AbilitySystem/PGAbilitySystemComponent.h"
+#include "Character/Common/PGHealthSetComponent.h"
 #include "Multiplayer/PGPlayerState.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 APGPlayableCharacter::APGPlayableCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = 350.f;
+	CameraBoom->bUsePawnControlRotation = true;
+	
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	FollowCamera->bUsePawnControlRotation = false;
+	
 	AvatarComponent = CreateDefaultSubobject<UPGAvatarComponent>(TEXT("AvaterComponent"));
 	InputBindingComponent = CreateDefaultSubobject<UPGInputBindingComponent>(TEXT("InputBindingComponent"));
+	HealthComponent = CreateDefaultSubobject<UPGHealthSetComponent>(TEXT("HealthComponent"));
 }
 
 UAbilitySystemComponent* APGPlayableCharacter::GetAbilitySystemComponent() const
@@ -47,6 +59,11 @@ void APGPlayableCharacter::PossessedBy(AController* NewController)
 		{
 			AvatarComponent->HandlePlayerControllerAssigned();
 			AvatarComponent->GrantDefaultAbilitiesAndApplyStartupEffects();
+
+			auto* PC = Cast<APGPlayerController>(NewController);
+			check(PC);
+
+			PC->CreateHUD(GetPGAbilitySystemComponent());
 		}
 
 		
@@ -62,6 +79,12 @@ void APGPlayableCharacter::OnRep_PlayerState()
 
 	AvatarComponent->HandlePlayerStateAssigned();
 	AvatarComponent->GrantDefaultAbilitiesAndApplyStartupEffects();
+
+	auto* PC = GetController<APGPlayerController>();
+	if (IsLocallyControlled() && PC != nullptr)
+	{
+		PC->CreateHUD(GetPGAbilitySystemComponent());
+	}
 }
 
 void APGPlayableCharacter::OnRep_Controller()
@@ -69,6 +92,12 @@ void APGPlayableCharacter::OnRep_Controller()
 	Super::OnRep_Controller();
 
 	AvatarComponent->HandlePlayerControllerAssigned();
+
+	auto* PC = GetController<APGPlayerController>();
+	if (IsLocallyControlled() && PC != nullptr)
+	{
+		PC->CreateHUD(GetPGAbilitySystemComponent());
+	}
 }
 
 void APGPlayableCharacter::Move(const FInputActionValue& Value)

@@ -2,18 +2,16 @@
 
 
 #include "PGGuardian.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
 #include "NiagaraComponent.h"
 #include "PGGuardianMovementComponent.h"
+#include "PGJetpackPowerSetComponent.h"
 #include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
 APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPGGuardianMovementComponent>(CharacterMovementComponentName))
-	, CameraBoom(CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom")))
-	, FollowCamera(CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera")))
 	, Jetpack(CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Jetpack")))
 	, JetpackEffect(CreateDefaultSubobject<UNiagaraComponent>(TEXT("JetpackEffect")))
 	, JetpackSoundEffect(CreateDefaultSubobject<UAudioComponent>(TEXT("JetpackSound")))
@@ -21,12 +19,7 @@ APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
 	GuardianMovementComponent = Cast<UPGGuardianMovementComponent>(GetCharacterMovement());
 	GuardianMovementComponent->SetIsReplicated(true);
 
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 350.f;
-	CameraBoom->bUsePawnControlRotation = true;
-
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
+	JetpackPowerSetComponent = CreateDefaultSubobject<UPGJetpackPowerSetComponent>(TEXT("JetpackPowerSetComponent"));
 
 	Jetpack->SetupAttachment(GetMesh(), TEXT("BackpackSocket"));
 
@@ -86,7 +79,7 @@ void APGGuardian::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateCamera(DeltaTime);
+	// UpdateCamera(DeltaTime);
 	UpdateJetpack(DeltaTime);	
 }
 

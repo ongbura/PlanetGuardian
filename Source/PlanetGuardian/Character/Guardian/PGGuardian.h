@@ -6,14 +6,11 @@
 #include "Character/PlayableCharacter/PGPlayableCharacter.h"
 #include "PGGuardian.generated.h"
 
+class UPGJetpackPowerSetComponent;
 class UPGGuardianMovementComponent;
-class USpringArmComponent;
-class UCameraComponent;
 class UNiagaraComponent;
 class UAudioComponent;
 class UCurveFloat;
-class UPGAbilitySystemComponent;
-class UPGHealthAttributeSet;
 
 UCLASS()
 class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
@@ -23,11 +20,8 @@ class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Movement", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UPGGuardianMovementComponent> GuardianMovementComponent;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Camera", meta=(AllowPrivateAccess="true"))
-	TObjectPtr<USpringArmComponent> CameraBoom;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Camera", meta=(AllowPrivateAccess="true"))
-	TObjectPtr<UCameraComponent> FollowCamera;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Jetpack", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UPGJetpackPowerSetComponent> JetpackPowerSetComponent;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Jetpack", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<USkeletalMeshComponent> Jetpack;
@@ -38,9 +32,6 @@ class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Jetpack", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UAudioComponent> JetpackSoundEffect;
 	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Ability", meta=(AllowPrivateAccess="true"))
-	TObjectPtr<UPGHealthAttributeSet> HealthAttributeSet;
-
 	bool bIsJetpackActivated{ false };
 	float ThrusterTime{ 0.f};
 

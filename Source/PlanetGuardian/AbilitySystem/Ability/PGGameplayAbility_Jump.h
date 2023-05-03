@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystem/PGGameplayAbility.h"
+#include "PGGameplayAbility.h"
 #include "PGGameplayAbility_Jump.generated.h"
 
 /**

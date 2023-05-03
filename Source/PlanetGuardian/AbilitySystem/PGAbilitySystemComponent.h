@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
-#include "PGAttributeSet.h"
+#include "AttributeSet/PGAttributeSet.h"
 #include "PGAbilitySystemComponent.generated.h"
 
 #define DEFAULT_ABILITY_LEVEL (1)

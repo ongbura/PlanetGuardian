@@ -12,12 +12,15 @@ void UPGAttributeSet::AdjustAttributeForMaxChange(const FGameplayAttributeData& 
 	check(AbilitySystem);
 
 	const float CurrentMaxValue = MaxAttribute.GetCurrentValue();
-	
-	// Change current value to maintain the current Val / Max percent
-	const float CurrentValue = AffectedAttribute.GetCurrentValue();
-	const float NewDelta = (CurrentValue * NewMaxValue / CurrentMaxValue) - CurrentValue;
 
-	AbilitySystem->ApplyModToAttributeUnsafe(AffectedAttributeProperty, EGameplayModOp::Additive, NewDelta);
+	if (!FMath::IsNearlyEqual(CurrentMaxValue, NewMaxValue))
+	{
+		// Change current value to maintain the current Val / Max percent
+		const float CurrentValue = AffectedAttribute.GetCurrentValue();
+		const float NewDelta = CurrentMaxValue > 0.f ? (CurrentValue * NewMaxValue / CurrentMaxValue) - CurrentValue : NewMaxValue;
+
+		AbilitySystem->ApplyModToAttributeUnsafe(AffectedAttributeProperty, EGameplayModOp::Additive, NewDelta);
+	}
 }
 
 void UPGAttributeSet::InitializeAttributeForMax(const FGameplayAttribute& Attribute, const FGameplayAttributeData& MaxAttributeData) const

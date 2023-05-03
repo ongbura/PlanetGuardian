@@ -3,13 +3,18 @@
 
 #include "PGPlayerState.h"
 #include "AbilitySystem/PGAbilitySystemComponent.h"
+#include "AbilitySystem/AttributeSet/PGJetpackPowerSet.h"
+#include "AbilitySystem/AttributeSet/PGHealthSet.h"
 
 APGPlayerState::APGPlayerState()
 {
 	AbilitySystem = CreateDefaultSubobject<UPGAbilitySystemComponent>(TEXT("Ability System"));
 	AbilitySystem->SetIsReplicated(true);
 
-	AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);	
+	AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
+
+	CreateDefaultSubobject<UPGHealthSet>(TEXT("HealthSet"));
+	CreateDefaultSubobject<UPGJetpackPowerSet>(TEXT("JetpackPowerSet"));
 }
 
 UAbilitySystemComponent* APGPlayerState::GetAbilitySystemComponent() const

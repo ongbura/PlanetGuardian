@@ -8,9 +8,12 @@
 #include "InputActionValue.h"
 #include "PGPlayableCharacter.generated.h"
 
+class USpringArmComponent;
+class UCameraComponent;
 class UPGAbilitySystemComponent;
 class UPGAvatarComponent;
 class UPGInputBindingComponent;
+class UPGHealthSetComponent;
 
 UCLASS()
 class PLANETGUARDIAN_API APGPlayableCharacter : public ACharacter, public IAbilitySystemInterface
@@ -18,14 +21,23 @@ class PLANETGUARDIAN_API APGPlayableCharacter : public ACharacter, public IAbili
 	GENERATED_BODY()
 	
 protected:
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Avatar")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	TObjectPtr<USpringArmComponent> CameraBoom;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	TObjectPtr<UCameraComponent> FollowCamera;
+	
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	TObjectPtr<UPGAvatarComponent> AvatarComponent;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Avatar")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	TObjectPtr<UPGInputBindingComponent> InputBindingComponent;
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	TObjectPtr<UPGHealthSetComponent> HealthComponent;
+
 public:
-	APGPlayableCharacter(const FObjectInitializer& ObjectInitializer);
+	explicit APGPlayableCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual bool IsAlive() const PURE_VIRTUAL(APGCharacter::IsAlive, return false;)
 

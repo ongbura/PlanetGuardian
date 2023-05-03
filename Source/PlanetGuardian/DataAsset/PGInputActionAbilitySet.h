@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "GameplayTagContainer.h"
-#include "AbilitySystem/PGGameplayAbility.h"
+#include "AbilitySystem/Ability/PGGameplayAbility.h"
 #include "PGInputActionAbilitySet.generated.h"
 
 class UInputAction;

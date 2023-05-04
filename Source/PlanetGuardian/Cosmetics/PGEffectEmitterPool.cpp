@@ -4,14 +4,14 @@
 #include "PGEffectEmitterPool.h"
 #include "PGEffectEmitter.h"
 #include "Subsystem/PGActorPoolSubsystem.h"
-#include "System/PGProjectSettings.h"
+#include "System/PGDeveloperSettings.h"
 
 APGEffectEmitterPool::APGEffectEmitterPool()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
-	if (auto* Settings = GetDefault<UPGProjectSettings>())
+	if (auto* Settings = GetDefault<UPGDeveloperSettings>())
 	{
 		EmitterPool = MakeUnique<TAtomicQueue<APGEffectEmitter*>>(Settings->EffectEmitterPoolCapacity);
 	}
@@ -24,7 +24,7 @@ APGEffectEmitter* APGEffectEmitterPool::PopEffectEmitter()
 		return Emitter;
 	}
 
-	auto* Settings = GetDefault<UPGProjectSettings>();
+	auto* Settings = GetDefault<UPGDeveloperSettings>();
 	check(Settings);
 
 	static int32 NumNewEmitters = Settings->NumNewEffectEmittersPerFrame;
@@ -51,7 +51,7 @@ void APGEffectEmitterPool::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (const auto* Settings = GetDefault<UPGProjectSettings>())
+	if (const auto* Settings = GetDefault<UPGDeveloperSettings>())
 	{
 		GenerateEffectEmitters(Settings->NumInitialEffectEmitters);
 	}

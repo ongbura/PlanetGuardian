@@ -6,6 +6,7 @@
 #include "Character/PlayableCharacter/PGPlayableCharacter.h"
 #include "PGGuardian.generated.h"
 
+struct FInputActionValue;
 class UPGJetpackPowerSetComponent;
 class UPGGuardianMovementComponent;
 class UNiagaraComponent;
@@ -52,6 +53,14 @@ public:
 	void ToggleJetpack(bool bReset, bool bActivate);
 
 protected:
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
+	virtual void PossessedBy(AController* NewController) override;
+
+	virtual void OnRep_PlayerState() override;
+
+	virtual void OnRep_Controller() override;
+
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
@@ -71,4 +80,17 @@ private:
 
 	UFUNCTION()
 	void OnLandedToggleJetpack(const FHitResult& Hit);
+
+	/**
+	 * @brief Keyboard wasd Movement
+	 */
+	void Move(const FInputActionValue& Value);
+	
+	/**
+	 * @brief Mouse look
+	 */
+	void Look(const FInputActionValue& Value);
+
+	UFUNCTION(Server, Reliable)
+	void ServerGrantDefaultAbilitiesAndApplyInitialEffects();
 };

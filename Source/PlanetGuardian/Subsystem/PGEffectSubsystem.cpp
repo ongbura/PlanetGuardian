@@ -5,7 +5,7 @@
 #include "System/PGGameGlobals.h"
 #include "NiagaraSystem.h"
 #include "System/PGAssetManager.h"
-#include "System/PGProjectSettings.h"
+#include "System/PGDeveloperSettings.h"
 #include "Sound/SoundBase.h"
 
 UPGEffectSubsystem* UPGEffectSubsystem::Get()
@@ -50,7 +50,7 @@ void UPGEffectSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UPGEffectSubsystem::AsyncLoadVisualSoundEffects()
 {
-	const auto* Settings = GetDefault<UPGProjectSettings>();
+	const auto* Settings = GetDefault<UPGDeveloperSettings>();
 	if (Settings == nullptr)
 	{
 		return;

@@ -7,7 +7,7 @@
 
 UPGJetpackPowerSet::UPGJetpackPowerSet()
 {
-	AttributeSetTag = GNativeTags.Attribute_Guardian_Movement;
+	AttributeSetTag = GNativeTags.Attribute_Guardian_JetpackPower;
 }
 
 void UPGJetpackPowerSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const

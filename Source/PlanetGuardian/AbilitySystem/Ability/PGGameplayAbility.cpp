@@ -3,6 +3,7 @@
 
 #include "PGGameplayAbility.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/PGAbilitySystemComponent.h"
 
 UPGGameplayAbility::UPGGameplayAbility()
 {
@@ -21,11 +22,16 @@ UPGGameplayAbility::UPGGameplayAbility()
 	bReplicateInputDirectly = false;
 }
 
+int32 UPGGameplayAbility::GetSystemGlobalLevel()
+{
+	return UPGAbilitySystemComponent::SystemGlobalLevel;
+}
+
 void UPGGameplayAbility::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
 {
 	Super::OnAvatarSet(ActorInfo, Spec);
 
-	if (bShouldActivateOnGranted)
+	if (ActivationPolicy == EPGAbilityActivationPolicy::OnSpawn)
 	{
 		ActorInfo->AbilitySystemComponent->TryActivateAbility(Spec.Handle, false);
 	}

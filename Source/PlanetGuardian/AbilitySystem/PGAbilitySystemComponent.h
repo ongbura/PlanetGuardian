@@ -7,49 +7,55 @@
 #include "AttributeSet/PGAttributeSet.h"
 #include "PGAbilitySystemComponent.generated.h"
 
-#define DEFAULT_ABILITY_LEVEL (1)
+class UEnhancedInputComponent;
+struct FEnhancedInputActionEventBinding;
 
-class UPGGameplayAbility;
-class UGameplayEffect;
-class UPGInputBindingComponent;
+USTRUCT()
+struct FPGAbilityInputHandle
+{
+	GENERATED_BODY()
+
+	FEnhancedInputActionEventBinding* OnPressedHandle {};
+
+	FEnhancedInputActionEventBinding* OnReleasedHandle {};
+};
 
 UCLASS()
 class PLANETGUARDIAN_API UPGAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
 
-	DECLARE_EVENT_OneParam(UPGAbilitySystemComponent, FOnGiveAbility, FGameplayAbilitySpec&)
-	DECLARE_EVENT_OneParam(UPGAbilitySystemComponent, FOnRemoveAbility, FGameplayAbilitySpec&)
-
 public:
-	FOnGiveAbility OnGiveAbilityEvent;
-	FOnRemoveAbility OnRemoveAbilityEvent;
-
+	inline static constexpr int32 SystemGlobalLevel { 1 };
+	
 private:
-	bool bStartupEffectsApplied{ false };
-
 	TMap<FGameplayTag, TArray<FDelegateHandle>> AttributeChangedDelegateHandles;
 
-	TWeakObjectPtr<UPGInputBindingComponent> InputBindingComponent;
+	TMap<int32, FPGAbilityInputHandle> AbilityInputHandles;
+
+	bool bAreAbilitiesBoundToInput;
 	
 public:
 	UPGAbilitySystemComponent();
+
+	static int32 GetSystemGlobalLevel() { return SystemGlobalLevel; } 
 
 	template <typename UserClass, typename FuncType>
 	void BindAttributeChangedDelegate(const UPGAttributeSet* AttributeSet, const FGameplayAttribute& Attribute, UserClass* User, FuncType Func);
 
 	void RemoveBoundAttributeChangedDelegate(const UPGAttributeSet* AttributeSet);
 
-	FORCEINLINE static int32 GetDefaultAbilityLevel() { return DEFAULT_ABILITY_LEVEL; }
-
-	bool IsStartupEffectsApplied() const { return bStartupEffectsApplied; }
+	void BindDefaultAbilitiesToInputComponent(UEnhancedInputComponent* EIC);
 
 protected:
-	virtual void BeginPlay() override;
-
 	virtual void OnGiveAbility(FGameplayAbilitySpec& AbilitySpec) override;
 
 	virtual void OnRemoveAbility(FGameplayAbilitySpec& AbilitySpec) override;
+
+private:
+	void OnAbilityInputPressed(int32 InputID);
+
+	void OnAbilityInputReleased(int32 InputID);
 };
 
 template <typename UserClass, typename FuncType>

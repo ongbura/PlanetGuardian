@@ -1,5 +1,5 @@
 "TagName","TagDevComment"
 "Ability.Guardian.Movement.Jump",""
-"Ability.Guardian.Movement.LaunchJetpack",
+"Ability.Guardian.Movement.Sprint",""
 "Attribute.Common.Health",""
-"Attribute.Guardian.Movement",""
+"Attribute.Guardian.JetpackPower",""

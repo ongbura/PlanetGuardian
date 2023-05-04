@@ -2,6 +2,8 @@
 
 
 #include "PGAbilitySystemComponent.h"
+#include "EnhancedInputComponent.h"
+#include "System/PGDeveloperSettings.h"
 
 UPGAbilitySystemComponent::UPGAbilitySystemComponent()
 {
@@ -13,32 +15,45 @@ void UPGAbilitySystemComponent::RemoveBoundAttributeChangedDelegate(const UPGAtt
 	AttributeChangedDelegateHandles.Remove(AttributeSetTag);
 }
 
-
-// Called when the game starts
-void UPGAbilitySystemComponent::BeginPlay()
+void UPGAbilitySystemComponent::BindDefaultAbilitiesToInputComponent(UEnhancedInputComponent* EIC)
 {
-	Super::BeginPlay();
-
-	// ...
+	if (bAreAbilitiesBoundToInput)
+	{
+		return;
+	}
 	
+	auto* Settings = GetDefault<UPGDeveloperSettings>();
+
+	for (const auto& [SoftAbility, SoftInputAction, InputID] : Settings->DefaultAbilities)
+	{
+		const auto* InputAction = SoftInputAction.LoadSynchronous();
+
+		auto& [OnPressedHandle, OnReleasedHandle] = AbilityInputHandles.Add(InputID);
+		OnPressedHandle = &EIC->BindAction(InputAction, ETriggerEvent::Triggered, this, &ThisClass::OnAbilityInputPressed, InputID);
+		OnReleasedHandle = &EIC->BindAction(InputAction, ETriggerEvent::Completed, this, &ThisClass::OnAbilityInputReleased, InputID);
+	}
+
+	bAreAbilitiesBoundToInput = true;
 }
 
 void UPGAbilitySystemComponent::OnGiveAbility(FGameplayAbilitySpec& AbilitySpec)
 {
-	if (OnGiveAbilityEvent.IsBound())
-	{
-		OnGiveAbilityEvent.Broadcast(AbilitySpec);
-	}
-	
+	// Called on server
 	Super::OnGiveAbility(AbilitySpec);
 }
 
 void UPGAbilitySystemComponent::OnRemoveAbility(FGameplayAbilitySpec& AbilitySpec)
 {
-	if (OnRemoveAbilityEvent.IsBound())
-	{
-		OnRemoveAbilityEvent.Broadcast(AbilitySpec);
-	}
-	
+	// Called on server	
 	Super::OnRemoveAbility(AbilitySpec);
+}
+
+void UPGAbilitySystemComponent::OnAbilityInputPressed(const int32 InputID)
+{
+	AbilityLocalInputPressed(InputID);
+}
+
+void UPGAbilitySystemComponent::OnAbilityInputReleased(const int32 InputID)
+{
+	AbilityLocalInputReleased(InputID);
 }

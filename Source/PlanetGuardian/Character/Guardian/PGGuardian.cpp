@@ -2,19 +2,25 @@
 
 
 #include "PGGuardian.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "NiagaraComponent.h"
 #include "PGGuardianMovementComponent.h"
 #include "PGJetpackPowerSetComponent.h"
+#include "AbilitySystem/PGAbilitySystemComponent.h"
+#include "AbilitySystem/Ability/PGGameplayAbility.h"
 #include "Components/AudioComponent.h"
+#include "Controller/PlayerController/PGGuardianController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "System/PGDeveloperSettings.h"
 
 APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPGGuardianMovementComponent>(CharacterMovementComponentName))
-	, Jetpack(CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Jetpack")))
-	, JetpackEffect(CreateDefaultSubobject<UNiagaraComponent>(TEXT("JetpackEffect")))
-	, JetpackSoundEffect(CreateDefaultSubobject<UAudioComponent>(TEXT("JetpackSound")))
+	  , Jetpack(CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Jetpack")))
+	  , JetpackEffect(CreateDefaultSubobject<UNiagaraComponent>(TEXT("JetpackEffect")))
+	  , JetpackSoundEffect(CreateDefaultSubobject<UAudioComponent>(TEXT("JetpackSound")))
 {
 	GuardianMovementComponent = Cast<UPGGuardianMovementComponent>(GetCharacterMovement());
 	GuardianMovementComponent->SetIsReplicated(true);
@@ -64,6 +70,65 @@ void APGGuardian::ToggleJetpack(const bool bReset, const bool bActivate)
 	}
 }
 
+void APGGuardian::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	auto* Settings = GetDefault<UPGDeveloperSettings>();
+	check(Settings);
+
+	const auto* PC = GetController<APlayerController>();
+	check(PC);
+
+	auto* EIS = PC->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	check(EIS);
+
+	EIS->AddMappingContext(Settings->InputMappingContext.LoadSynchronous(), 0);
+
+	auto* EIC = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
+	EIC->BindAction(Settings->MoveInputAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &APGGuardian::Move);
+	EIC->BindAction(Settings->LookInputAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &APGGuardian::Look);
+
+	if (auto* AbilitySystem = GetPGAbilitySystemComponent())
+	{
+		AbilitySystem->BindDefaultAbilitiesToInputComponent(EIC);
+	}
+}
+
+void APGGuardian::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// Grant Abilities	
+}
+
+void APGGuardian::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	ServerGrantDefaultAbilitiesAndApplyInitialEffects();
+
+	if (auto* PC = GetController<APGGuardianController>())
+	{
+		PC->MakeHUDVisible(GetPGAbilitySystemComponent());
+	}
+
+	if (auto* EIC = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		GetPGAbilitySystemComponent()->BindDefaultAbilitiesToInputComponent(EIC);
+	}
+}
+
+void APGGuardian::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+
+	if (auto* PC = GetController<APGGuardianController>())
+	{
+		PC->MakeHUDVisible(GetPGAbilitySystemComponent());
+	}
+}
+
 void APGGuardian::BeginPlay()
 {
 	Super::BeginPlay();
@@ -71,8 +136,6 @@ void APGGuardian::BeginPlay()
 	ResetThrusterTime();
 
 	LandedDelegate.AddDynamic(this, &APGGuardian::OnLandedToggleJetpack);
-
-	
 }
 
 void APGGuardian::Tick(float DeltaTime)
@@ -80,7 +143,7 @@ void APGGuardian::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// UpdateCamera(DeltaTime);
-	UpdateJetpack(DeltaTime);	
+	UpdateJetpack(DeltaTime);
 }
 
 void APGGuardian::UpdateCamera(const float DeltaSeconds)
@@ -90,18 +153,20 @@ void APGGuardian::UpdateCamera(const float DeltaSeconds)
 		FHitResult HitResult;
 
 		const FVector Start = GetActorLocation();
-		const FVector End = Start + FVector{ 0.f, 0.f, 250.f};
-		
-		World->LineTraceSingleByChannel(HitResult, Start, End, ECC_Camera, FCollisionQueryParams{ NAME_None, false, this });
+		const FVector End = Start + FVector { 0.f, 0.f, 250.f };
+
+		World->LineTraceSingleByChannel(HitResult, Start, End, ECC_Camera,
+		                                FCollisionQueryParams { NAME_None, false, this });
 
 		float LerpTarget = GetCharacterMovement()->IsFalling() ? 600.f : 500.f;
-		
+
 		if (HitResult.bBlockingHit)
 		{
 			LerpTarget = 300.f;
 		}
 
-		const float TargetArmLengthThisFrame = UKismetMathLibrary::FInterpTo(CameraBoom->TargetArmLength, LerpTarget, DeltaSeconds, 2.f);
+		const float TargetArmLengthThisFrame = UKismetMathLibrary::FInterpTo(
+			CameraBoom->TargetArmLength, LerpTarget, DeltaSeconds, 2.f);
 
 		CameraBoom->TargetArmLength = TargetArmLengthThisFrame;
 	}
@@ -113,16 +178,17 @@ void APGGuardian::UpdateJetpack(const float DeltaSeconds)
 	{
 		return;
 	}
-	
+
 	// When Jetpack is active decrease the thruster time
 	ThrusterTime -= DeltaSeconds;
 
 	// Using ThrusterMaxTime to get a value between 0 and 1 and use that in a curve to get the launch velocity on the character.
 	// Now you can modify the curve to get the wanted behaviour.
 	// The bot is only launched a bit at start but then the jetpack depletes.
-	const float NormalizedTime = UKismetMathLibrary::NormalizeToRange(ThrusterMaxTime - ThrusterTime, 0.f, ThrusterMaxTime);
+	const float NormalizedTime = UKismetMathLibrary::NormalizeToRange(ThrusterMaxTime - ThrusterTime, 0.f,
+	                                                                  ThrusterMaxTime);
 	const float JetpackBoost = JetpackBoostCurve->GetFloatValue(NormalizedTime);
-	LaunchCharacter({0.f, 0.f, JetpackBoost * 120.f}, false, true);
+	LaunchCharacter({ 0.f, 0.f, JetpackBoost * 120.f }, false, true);
 
 	// The particle effect samples the sockets and has a variable that can be updated.
 	// So the thrust amount is reflected in the visible effect.
@@ -139,4 +205,67 @@ void APGGuardian::UpdateJetpack(const float DeltaSeconds)
 void APGGuardian::OnLandedToggleJetpack(const FHitResult& Hit)
 {
 	ToggleJetpack(true, false);
+}
+
+void APGGuardian::Move(const FInputActionValue& Value)
+{
+	const auto MoveInput = Value.Get<FInputActionValue::Axis2D>();
+
+	const FRotator CameraWorldRotation(0.f, GetControlRotation().Yaw, 0.f);
+	const FVector ForwardBasedXInput(FRotationMatrix(CameraWorldRotation).GetScaledAxis(EAxis::X) * MoveInput.X);
+	const FVector RightBasedYInput(FRotationMatrix(CameraWorldRotation).GetScaledAxis(EAxis::Y) * MoveInput.Y);
+
+	FVector DirectionToMove(ForwardBasedXInput + RightBasedYInput);
+	DirectionToMove.Normalize();
+
+	const float MoveAmount = FMath::Abs(MoveInput.X) > FMath::Abs(MoveInput.Y)
+		                         ? FMath::Abs(MoveInput.X)
+		                         : FMath::Abs(MoveInput.Y);
+
+	AddMovementInput(DirectionToMove, MoveAmount);
+}
+
+void APGGuardian::Look(const FInputActionValue& Value)
+{
+	if (auto* PC = Cast<APlayerController>(GetController()))
+	{
+		const auto AxisValue = Value.Get<FInputActionValue::Axis2D>();
+		PC->AddYawInput(AxisValue.X);
+		PC->AddPitchInput(AxisValue.Y);
+	}
+}
+
+void APGGuardian::ServerGrantDefaultAbilitiesAndApplyInitialEffects_Implementation()
+{
+	auto* Settings = GetDefault<UPGDeveloperSettings>();
+
+	for (const auto& AbilitySet : Settings->DefaultAbilities)
+	{
+		if (auto* Ability = Cast<UPGGameplayAbility>(AbilitySet.AbilityClass.LoadSynchronous()))
+		{
+			FGameplayAbilitySpec Spec
+			{
+				Ability,
+				UPGAbilitySystemComponent::SystemGlobalLevel,
+				AbilitySet.InputID,
+				this
+			};
+
+			GetPGAbilitySystemComponent()->GiveAbility(Spec);
+		}
+	}
+
+	auto* AbilitySystem = GetAbilitySystemComponent();
+	auto EffectContext = AbilitySystem->MakeEffectContext();
+	EffectContext.AddSourceObject(this);
+
+	for (const auto& Effect : Settings->InitialEffects)
+	{
+		auto SpecHandle = AbilitySystem->MakeOutgoingSpec(Effect.LoadSynchronous(),
+		                                                  UPGAbilitySystemComponent::SystemGlobalLevel, EffectContext);
+		if (SpecHandle.IsValid())
+		{
+			AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
+	}
 }

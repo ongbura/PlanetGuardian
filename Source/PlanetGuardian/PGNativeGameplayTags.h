@@ -9,13 +9,13 @@ static struct FPGNativeGameplayTags : FGameplayTagNativeAdder
 {
     // Ability.Guardian
 	FGameplayTag Ability_Guardian_Movement_Jump{};
-	FGameplayTag Ability_Guardian_Movement_LaunchJetpack{};
+	FGameplayTag Ability_Guardian_Movement_Sprint{};
 	
 	// Attribute.Common
 	FGameplayTag Attribute_Common_Health{};
 	
 	// Attribute.Guardian
-	FGameplayTag Attribute_Guardian_Movement{};
+	FGameplayTag Attribute_Guardian_JetpackPower{};
 
     virtual void AddTags() override;
 } GNativeTags;

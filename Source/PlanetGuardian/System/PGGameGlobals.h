@@ -33,4 +33,6 @@ public:
 	}
 
 	void SetCurrentWorld(UWorld* World) { CurrentWorld.Reset(); CurrentWorld = World; }
+
+	const UWorld* GetCurrentWorld() const { return CurrentWorld.IsValid() ? CurrentWorld.Get() : nullptr; }
 };

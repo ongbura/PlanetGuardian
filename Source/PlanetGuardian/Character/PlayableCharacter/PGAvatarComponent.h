@@ -32,12 +32,6 @@ private:
 	
 	TWeakObjectPtr<UPGAbilitySystemComponent> AbilitySystemComponent;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	TArray<TSubclassOf<UPGGameplayAbility>> DefaultAbilities;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
-
 public:
 	UPGAvatarComponent();
 
@@ -50,17 +44,9 @@ public:
 	void HandlePlayerControllerAssigned();
 
 	void HandlePlayerStateAssigned();
-
-	UFUNCTION(Server, Reliable)
-	void GrantDefaultAbilitiesAndApplyStartupEffects();
 	
 protected:
 	virtual void BeginPlay() override;
 	
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-private:
-	void GrantDefaultAbilities();
-
-	void ApplyStartupEffects();	
 };

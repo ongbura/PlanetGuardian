@@ -4,37 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "PGGameplayAbility.h"
-#include "PGGameplayAbility_Jump.generated.h"
+#include "PGGameplayAbility_Sprint.generated.h"
 
-/**
- * 
- */
+class UGameplayEffect;
+
 UCLASS(Abstract)
-class PLANETGUARDIAN_API UPGGameplayAbility_Jump : public UPGGameplayAbility
+class PLANETGUARDIAN_API UPGGameplayAbility_Sprint : public UPGGameplayAbility
 {
 	GENERATED_BODY()
 
-public:
-	UPGGameplayAbility_Jump();
+	bool bShouldSprint { false };
+
+	FActiveGameplayEffectHandle SprintEffectHandle;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	TSubclassOf<UGameplayEffect> SprintEffectClass;
 
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilityActivationInfo ActivationInfo,
 	                             const FGameplayEventData* TriggerEventData) override;
 
-	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-	                                const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
-	                                FGameplayTagContainer* OptionalRelevantTags) const override;
-
-	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-	                           const FGameplayAbilityActivationInfo ActivationInfo) override;
-
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	                        const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility,
 	                        bool bWasCancelled) override;
 
 private:
-	void Jump();
-
-	void StopJumping();
+	UFUNCTION()
+	void OnSprintKeyReleased(float TimeHeld);
 };

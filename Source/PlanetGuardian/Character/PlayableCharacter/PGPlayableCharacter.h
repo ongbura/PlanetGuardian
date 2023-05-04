@@ -4,19 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
-#include "GameFramework/Character.h"
-#include "InputActionValue.h"
+#include "Character/Common/PGCharacter.h"
 #include "PGPlayableCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class UPGAbilitySystemComponent;
 class UPGAvatarComponent;
-class UPGInputBindingComponent;
 class UPGHealthSetComponent;
 
+
+
+
 UCLASS()
-class PLANETGUARDIAN_API APGPlayableCharacter : public ACharacter, public IAbilitySystemInterface
+class PLANETGUARDIAN_API APGPlayableCharacter : public APGCharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 	
@@ -29,9 +30,6 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	TObjectPtr<UPGAvatarComponent> AvatarComponent;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	TObjectPtr<UPGInputBindingComponent> InputBindingComponent;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	TObjectPtr<UPGHealthSetComponent> HealthComponent;
@@ -53,8 +51,4 @@ protected:
 	virtual void OnRep_PlayerState() override;
 
 	virtual void OnRep_Controller() override;
-
-private:
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
 };

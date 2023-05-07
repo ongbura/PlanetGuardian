@@ -12,12 +12,12 @@ class PLANETGUARDIAN_API UPGGuardianMovementComponent : public UCharacterMovemen
 {
 	GENERATED_BODY()
 
+	friend class FSavedMove_Guardian;
+
 	UPROPERTY(Category="Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"), meta=(AllowPrivateAccess="true"))
 	float MaxSprintSpeed { 1000.f };
 
-	bool bWantToSprint { false };
-
-	bool bToggledSprint { false };
+	bool bWantsToSprint { false };
 	
 public:
 	UPGGuardianMovementComponent();
@@ -33,11 +33,9 @@ protected:
 
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 
-	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
+	virtual float GetMaxSpeed() const override;
 
-public:
-	void SetWantToSprint(const bool bNewWantToSprint) { bWantToSprint = bNewWantToSprint; }
-	bool WantsToSprint() const { return bWantToSprint; }
+	virtual void OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation, const FVector& OldVelocity) override;
 };
 
 class FSavedMove_Guardian final : public FSavedMove_Character

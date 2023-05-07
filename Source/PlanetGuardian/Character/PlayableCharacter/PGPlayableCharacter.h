@@ -27,10 +27,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Components")
 	TObjectPtr<UCameraComponent> FollowCamera;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="AbilitySystem")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Ability System")
 	TObjectPtr<UPGAvatarComponent> AvatarComponent;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="AbilitySystem")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Ability System")
 	TObjectPtr<UPGHealthSetComponent> HealthComponent;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Input")

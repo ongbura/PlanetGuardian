@@ -6,6 +6,8 @@
 #include "Character/PlayableCharacter/PGPlayableCharacter.h"
 #include "PGGuardian.generated.h"
 
+class UGameplayEffect;
+class UPGGameplayAbility;
 class UPGAbilityInputData;
 struct FInputActionValue;
 class UPGJetpackPowerSetComponent;
@@ -45,6 +47,9 @@ class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UPGAbilityInputData> AbilityInputData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Ability System", meta=(AllowPrivateAccess="true"))
+	TSet<TSubclassOf<UPGGameplayAbility>> DefaultAbilities;
 
 public:
 	explicit APGGuardian(const FObjectInitializer& ObjectInitializer);

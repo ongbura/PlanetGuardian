@@ -12,8 +12,7 @@ UPGGuardianMovementComponent::UPGGuardianMovementComponent()
 
 void UPGGuardianMovementComponent::Sprint()
 {
-	bWantToSprint = true;
-	bToggledSprint = true;
+	bWantsToSprint = true;
 }
 
 bool UPGGuardianMovementComponent::CanSprint() const
@@ -23,8 +22,7 @@ bool UPGGuardianMovementComponent::CanSprint() const
 
 void UPGGuardianMovementComponent::StopSprinting()
 {
-	bWantToSprint = false;
-	bToggledSprint = true;
+	bWantsToSprint = false;
 }
 
 FNetworkPredictionData_Client* UPGGuardianMovementComponent::GetPredictionData_Client() const
@@ -45,22 +43,36 @@ void UPGGuardianMovementComponent::UpdateFromCompressedFlags(const uint8 Flags)
 {
 	Super::UpdateFromCompressedFlags(Flags);
 
-	bWantToSprint = (Flags & FSavedMove_Character::FLAG_Custom_0) != 0;
+	bWantsToSprint = (Flags & FSavedMove_Character::FLAG_Custom_0) != 0;
+}
+
+float UPGGuardianMovementComponent::GetMaxSpeed() const
+{
+	const auto TempMaxSpeed = bWantsToSprint ? MaxSprintSpeed : MaxWalkSpeed;
+	
+	switch(MovementMode)
+	{
+	case MOVE_Walking:
+	case MOVE_NavWalking:
+		return IsCrouching() ? MaxWalkSpeedCrouched : TempMaxSpeed;
+	case MOVE_Falling:
+		return TempMaxSpeed;
+	case MOVE_Swimming:
+		return MaxSwimSpeed;
+	case MOVE_Flying:
+		return MaxFlySpeed;
+	case MOVE_Custom:
+		return MaxCustomMovementSpeed;
+	case MOVE_None:
+	default:
+		return 0.f;
+	}
 }
 
 void UPGGuardianMovementComponent::OnMovementUpdated(const float DeltaSeconds, const FVector& OldLocation,
                                                      const FVector& OldVelocity)
 {
 	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
-
-	if (bToggledSprint && MovementMode == MOVE_Walking)
-	{
-		const float Temp = MaxWalkSpeed;
-		MaxWalkSpeed = MaxSprintSpeed;
-		MaxSprintSpeed = Temp;
-
-		bToggledSprint = false;
-	}
 }
 
 FSavedMove_Guardian::FSavedMove_Guardian()
@@ -106,7 +118,7 @@ void FSavedMove_Guardian::SetMoveFor(ACharacter* C, float InDeltaTime, FVector c
 
 	if (const auto* CMC = Cast<UPGGuardianMovementComponent>(C->GetCharacterMovement()))
 	{
-		bWantsToSprint = CMC->WantsToSprint();
+		bWantsToSprint = CMC->bWantsToSprint;
 	}
 }
 
@@ -116,7 +128,7 @@ void FSavedMove_Guardian::PrepMoveFor(ACharacter* C)
 
 	if (auto* CMC = Cast<UPGGuardianMovementComponent>(C->GetCharacterMovement()))
 	{
-		CMC->SetWantToSprint(bWantsToSprint);
+		CMC->bWantsToSprint = bWantsToSprint;
 	}
 }
 

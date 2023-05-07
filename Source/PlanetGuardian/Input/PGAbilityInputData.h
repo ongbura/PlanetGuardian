@@ -26,17 +26,17 @@ struct FPGAbilityInputSet
 
 	friend uint32 GetTypeHash(const FPGAbilityInputSet& Info)
 	{
-		return GetTypeHash(Info.AbilityClass);
+		return HashCombine(GetTypeHash(Info.AbilityClass), GetTypeHash(Info.SoftInputAction));
 	}
 
 	bool operator==(const FPGAbilityInputSet& Other) const
 	{
-		return AbilityClass == Other.AbilityClass && InputID == Other.InputID;
+		return AbilityClass == Other.AbilityClass && SoftInputAction == Other.SoftInputAction && InputID == Other.InputID;
 	}
 
 	bool Equals(const FPGAbilityInputSet& Other) const
 	{
-		return AbilityClass == Other.AbilityClass && InputID == Other.InputID;
+		return AbilityClass == Other.AbilityClass && SoftInputAction == Other.SoftInputAction && InputID == Other.InputID;
 	}	
 };
 

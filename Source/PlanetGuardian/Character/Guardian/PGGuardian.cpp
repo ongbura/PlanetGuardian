@@ -88,8 +88,10 @@ void APGGuardian::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 			EIS->AddMappingContext(MappingContext, Priority);
 		}
 	}
-	
-	if (auto* AbilitySystem = GetPGAbilitySystemComponent())
+
+	auto* AbilitySystem = GetPGAbilitySystemComponent();
+
+	if (AbilityInputData != nullptr && AbilitySystem != nullptr)
 	{
 		AbilitySystem->BindAbilitiesToInput(AbilityInputData, Cast<UEnhancedInputComponent>(InputComponent));
 	}
@@ -98,13 +100,50 @@ void APGGuardian::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 void APGGuardian::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+
+	auto* AbilitySystem = GetPGAbilitySystemComponent();
+
+	if (AbilityInputData)
+	{
+		auto CopiedDefaultAbilities = DefaultAbilities;
+		const auto& AbilityInputSets = AbilityInputData->GetAbilityInputSets();
+
+		for (const auto& [AbilityClass, SoftInputAction, InputID] : AbilityInputSets)
+		{
+			if (DefaultAbilities.Contains(AbilityClass))
+			{
+				FGameplayAbilitySpec Spec
+				{
+					AbilityClass,
+					AbilitySystem->GetSystemGlobalLevel(),
+					InputID,
+					this
+				};
+
+				AbilitySystem->GiveAbility(Spec);
+				CopiedDefaultAbilities.Remove(AbilityClass);
+			}
+		}
+
+		for (const auto& AbilityClass : CopiedDefaultAbilities)
+		{
+			AbilitySystem->GiveAbility({ AbilityClass });
+		}		
+	}
+	else
+	{
+		for (const auto& AbilityClass : DefaultAbilities)
+		{
+			AbilitySystem->GiveAbility({ AbilityClass });
+		}
+	}
 }
 
 void APGGuardian::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	if (InputComponent == nullptr)
+	if (AbilityInputData == nullptr || InputComponent != nullptr)
 	{
 		return;
 	}
@@ -138,8 +177,6 @@ void APGGuardian::Tick(float DeltaTime)
 
 	// UpdateCamera(DeltaTime);
 	UpdateJetpack(DeltaTime);
-
-	
 }
 
 void APGGuardian::UpdateCamera(const float DeltaSeconds)

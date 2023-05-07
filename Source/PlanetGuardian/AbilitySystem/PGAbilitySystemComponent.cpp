@@ -28,7 +28,7 @@ void UPGAbilitySystemComponent::BindAbilityToInput(const int32 InputID, const UI
 	auto& [OnPressedHandle, OnReleasedHandle] = AbilityInputHandles.Add(InputID);
 
 	OnPressedHandle = &EIC->BindAction(InputAction, ETriggerEvent::Triggered, this, &ThisClass::OnAbilityInputPressed, InputID);
-	OnReleasedHandle = &EIC->BindAction(InputAction, ETriggerEvent::Started, this, &ThisClass::OnAbilityInputReleased, InputID);
+	OnReleasedHandle = &EIC->BindAction(InputAction, ETriggerEvent::Completed, this, &ThisClass::OnAbilityInputReleased, InputID);
 }
 
 void UPGAbilitySystemComponent::UnbindAbilityFromInput(const int32 InputID, UEnhancedInputComponent* EIC)

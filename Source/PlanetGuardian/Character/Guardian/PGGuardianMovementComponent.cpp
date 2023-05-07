@@ -8,9 +8,10 @@
 
 UPGGuardianMovementComponent::UPGGuardianMovementComponent()
 {
+	NavAgentProps.bCanCrouch = true;
 }
 
-void UPGGuardianMovementComponent::Sprint()
+void UPGGuardianMovementComponent::SprintPressed()
 {
 	bWantsToSprint = true;
 }
@@ -20,9 +21,15 @@ bool UPGGuardianMovementComponent::CanSprint() const
 	return (MovementMode == MOVE_Walking || MovementMode == MOVE_NavWalking) && !IsCrouching() && !IsFalling();
 }
 
-void UPGGuardianMovementComponent::StopSprinting()
+void UPGGuardianMovementComponent::SprintReleased()
 {
 	bWantsToSprint = false;
+}
+
+void UPGGuardianMovementComponent::ToggleCrouch()
+{
+	bWantsToCrouchOld = bWantsToCrouch;
+	bWantsToCrouch = !bWantsToCrouch;
 }
 
 FNetworkPredictionData_Client* UPGGuardianMovementComponent::GetPredictionData_Client() const
@@ -73,6 +80,8 @@ void UPGGuardianMovementComponent::OnMovementUpdated(const float DeltaSeconds, c
                                                      const FVector& OldVelocity)
 {
 	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
+
+	bToggledCrouch = bWantsToCrouchOld != bWantsToCrouch;
 }
 
 FSavedMove_Guardian::FSavedMove_Guardian()

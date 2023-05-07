@@ -2,3 +2,13 @@
 
 
 #include "PGPlayerController.h"
+
+void APGPlayerController::AcknowledgePossession(APawn* P)
+{
+	Super::AcknowledgePossession(P);
+
+	if (OnAcknowledgePossession.IsBound())
+	{
+		OnAcknowledgePossession.Broadcast(P);
+	}
+}

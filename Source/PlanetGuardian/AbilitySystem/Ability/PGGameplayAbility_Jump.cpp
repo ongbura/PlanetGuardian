@@ -3,7 +3,7 @@
 
 #include "PGGameplayAbility_Jump.h"
 #include "PGNativeGameplayTags.h"
-#include "Character/PlayableCharacter/PGPlayableCharacter.h"
+#include "Character/Guardian/PGGuardian.h"
 
 UPGGameplayAbility_Jump::UPGGameplayAbility_Jump()
 {
@@ -69,7 +69,7 @@ void UPGGameplayAbility_Jump::EndAbility(const FGameplayAbilitySpecHandle Handle
 
 void UPGGameplayAbility_Jump::Jump()
 {
-	if (auto* Avatar = Cast<APGPlayableCharacter>(GetAvatarActorFromActorInfo()))
+	if (auto* Avatar = Cast<APGGuardian>(GetAvatarActorFromActorInfo()))
 	{
 		if (Avatar->IsLocallyControlled() && !Avatar->bPressedJump)
 		{
@@ -81,7 +81,7 @@ void UPGGameplayAbility_Jump::Jump()
 
 void UPGGameplayAbility_Jump::StopJumping()
 {
-	if (auto* Avatar = Cast<APGPlayableCharacter>(GetAvatarActorFromActorInfo()))
+	if (auto* Avatar = Cast<APGGuardian>(GetAvatarActorFromActorInfo()))
 	{
 		if (Avatar->IsLocallyControlled() && Avatar->bPressedJump)
 		{

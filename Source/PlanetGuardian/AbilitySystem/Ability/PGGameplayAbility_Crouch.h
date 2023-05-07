@@ -4,22 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "PGGameplayAbility.h"
-#include "PGGameplayAbility_Sprint.generated.h"
+#include "PGGameplayAbility_Crouch.generated.h"
 
-class UGameplayEffect;
-
-UCLASS(Abstract)
-class PLANETGUARDIAN_API UPGGameplayAbility_Sprint : public UPGGameplayAbility
+/**
+ * 
+ */
+UCLASS()
+class PLANETGUARDIAN_API UPGGameplayAbility_Crouch : public UPGGameplayAbility
 {
 	GENERATED_BODY()
-
-	FActiveGameplayEffectHandle SprintEffectHandle;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	TSubclassOf<UGameplayEffect> SprintEffectClass;
-
-public:
-	UPGGameplayAbility_Sprint();
 
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -36,9 +29,4 @@ protected:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	                        const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility,
 	                        bool bWasCancelled) override;
-
-private:
-	void Sprint();
-
-	void StopSprinting();
 };

@@ -11,10 +11,12 @@
 #include "Components/AudioComponent.h"
 #include "Controller/PlayerController/PGGuardianController.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Input/PGAbilityInputData.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "InputMappingContext.h"
+#include "PGSpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+
 
 APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPGGuardianMovementComponent>(CharacterMovementComponentName))
@@ -22,6 +24,15 @@ APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
 	  , JetpackEffect(CreateDefaultSubobject<UNiagaraComponent>(TEXT("JetpackEffect")))
 	  , JetpackSoundEffect(CreateDefaultSubobject<UAudioComponent>(TEXT("JetpackSound")))
 {
+	CameraBoom = CreateDefaultSubobject<UPGSpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = 350.f;
+	CameraBoom->bUsePawnControlRotation = true;
+	
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	FollowCamera->bUsePawnControlRotation = false;
+	
 	GuardianMovementComponent = Cast<UPGGuardianMovementComponent>(GetCharacterMovement());
 	GuardianMovementComponent->SetIsReplicated(true);
 

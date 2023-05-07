@@ -18,15 +18,23 @@ class PLANETGUARDIAN_API UPGGuardianMovementComponent : public UCharacterMovemen
 	float MaxSprintSpeed { 1000.f };
 
 	bool bWantsToSprint { false };
+
+	bool bToggledCrouch { false };
+
+	bool bWantsToCrouchOld { false };
 	
 public:
 	UPGGuardianMovementComponent();
 
-	void Sprint();
+	void SprintPressed();
 
 	bool CanSprint() const;
 
-	void StopSprinting();
+	void SprintReleased();
+
+	void ToggleCrouch();
+
+	bool WasToggledCrouch() const { return bToggledCrouch; }
 
 protected:
 	virtual FNetworkPredictionData_Client* GetPredictionData_Client() const override;

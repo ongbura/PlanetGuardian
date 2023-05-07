@@ -8,8 +8,6 @@
 #include "PGPlayableCharacter.generated.h"
 
 struct FInputActionValue;
-class USpringArmComponent;
-class UCameraComponent;
 class UPGAbilitySystemComponent;
 class UPGAvatarComponent;
 class UPGHealthSetComponent;
@@ -21,12 +19,6 @@ class PLANETGUARDIAN_API APGPlayableCharacter : public APGCharacter, public IAbi
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Components")
-	TObjectPtr<USpringArmComponent> CameraBoom;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Components")
-	TObjectPtr<UCameraComponent> FollowCamera;
-
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Ability System")
 	TObjectPtr<UPGAvatarComponent> AvatarComponent;
 

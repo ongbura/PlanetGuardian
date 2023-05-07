@@ -8,24 +8,13 @@
 #include "AbilitySystem/PGAbilitySystemComponent.h"
 #include "Character/Common/PGHealthSetComponent.h"
 #include "Multiplayer/PGPlayerState.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
 #include "Input/PGNativeInputData.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
 
 APGPlayableCharacter::APGPlayableCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
-{
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 350.f;
-	CameraBoom->bUsePawnControlRotation = true;
-	
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
-	
+{	
 	AvatarComponent = CreateDefaultSubobject<UPGAvatarComponent>(TEXT("AvaterComponent"));
 	HealthComponent = CreateDefaultSubobject<UPGHealthSetComponent>(TEXT("HealthComponent"));
 }

@@ -11,4 +11,11 @@ class PLANETGUARDIAN_API APGPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+	DECLARE_EVENT_OneParam(APGPlayerController, FOnAcknowledgePossession, APawn*)
+	
+public:
+	FOnAcknowledgePossession OnAcknowledgePossession;
+
+protected:
+	virtual void AcknowledgePossession(APawn* P) override;
 };

@@ -3,6 +3,7 @@
 
 #include "PGGameplayAbility_Sprint.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
+#include "Character/Guardian/PGGuardian.h"
 #include "Character/Guardian/PGGuardianMovementComponent.h"
 
 UPGGameplayAbility_Sprint::UPGGameplayAbility_Sprint()
@@ -16,25 +17,23 @@ void UPGGameplayAbility_Sprint::ActivateAbility(const FGameplayAbilitySpecHandle
                                                 const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	bShouldSprint = true;
 
-	if (SprintEffectClass != nullptr)
+	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
 	{
-		const auto* Effect = SprintEffectClass->GetDefaultObject<UGameplayEffect>();
-		SprintEffectHandle = ApplyGameplayEffectToOwner(Handle, ActorInfo, ActivationInfo, Effect, GetSystemGlobalLevel());
+		if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
+		{
+			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		}
+
+		Sprint();
 	}
-
-	// TODO: Add GameplayCue to owner which removed on ability end.
-
-	auto* CMC = Cast<UPGGuardianMovementComponent>(ActorInfo->MovementComponent);
-	check(CMC);
-	
-	CMC->Sprint();
 }
 
 bool UPGGameplayAbility_Sprint::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags,
-	const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
+                                                   const FGameplayAbilityActorInfo* ActorInfo,
+                                                   const FGameplayTagContainer* SourceTags,
+                                                   const FGameplayTagContainer* TargetTags,
+                                                   FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
 	{
@@ -53,7 +52,8 @@ bool UPGGameplayAbility_Sprint::CanActivateAbility(const FGameplayAbilitySpecHan
 }
 
 void UPGGameplayAbility_Sprint::InputReleased(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
+                                              const FGameplayAbilityActorInfo* ActorInfo,
+                                              const FGameplayAbilityActivationInfo ActivationInfo)
 {
 	Super::InputReleased(Handle, ActorInfo, ActivationInfo);
 
@@ -65,15 +65,47 @@ void UPGGameplayAbility_Sprint::EndAbility(const FGameplayAbilitySpecHandle Hand
                                            const FGameplayAbilityActivationInfo ActivationInfo,
                                            bool bReplicateEndAbility, bool bWasCancelled)
 {
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+	StopSprinting();
 
-	if (SprintEffectHandle.IsValid())
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);	
+}
+
+void UPGGameplayAbility_Sprint::Sprint()
+{
+	if (const auto* Avatar = Cast<APGGuardian>(GetAvatarActorFromActorInfo()))
 	{
-		BP_RemoveGameplayEffectFromOwnerWithHandle(SprintEffectHandle);
-	}
+		if (Avatar->IsLocallyControlled())
+		{
+			if (SprintEffectClass != nullptr)
+			{
+				const auto* Effect = SprintEffectClass->GetDefaultObject<UGameplayEffect>();
+				SprintEffectHandle = ApplyGameplayEffectToOwner(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(),
+				                                                GetCurrentActivationInfo(), Effect,
+				                                                GetSystemGlobalLevel());
+			}
 
-	auto* CMC = Cast<UPGGuardianMovementComponent>(ActorInfo->MovementComponent);
-	check(CMC);
-	
-	CMC->StopSprinting();
+			// TODO: Add GameplayCue to owner which removed on ability end.
+
+			auto* CMC = Cast<UPGGuardianMovementComponent>(Avatar->GetMovementComponent());
+			check(CMC);
+
+			CMC->SprintPressed();
+		}
+	}
+}
+
+void UPGGameplayAbility_Sprint::StopSprinting()
+{
+	if (const auto* Avatar = Cast<APGGuardian>(GetAvatarActorFromActorInfo()))
+	{
+		if (SprintEffectHandle.IsValid())
+		{
+			BP_RemoveGameplayEffectFromOwnerWithHandle(SprintEffectHandle);
+		}
+
+		auto* CMC = Cast<UPGGuardianMovementComponent>(Avatar->GetMovementComponent());
+		check(CMC);
+
+		CMC->SprintReleased();
+	}	
 }

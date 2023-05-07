@@ -6,6 +6,8 @@
 #include "Character/PlayableCharacter/PGPlayableCharacter.h"
 #include "PGGuardian.generated.h"
 
+class UCameraComponent;
+class UPGSpringArmComponent;
 class UGameplayEffect;
 class UPGGameplayAbility;
 class UPGAbilityInputData;
@@ -20,6 +22,12 @@ UCLASS()
 class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
 {
 	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Components", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UPGSpringArmComponent> CameraBoom;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Components", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UCameraComponent> FollowCamera;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Movement", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UPGGuardianMovementComponent> GuardianMovementComponent;
@@ -73,6 +81,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	
 
 private:
 	/**

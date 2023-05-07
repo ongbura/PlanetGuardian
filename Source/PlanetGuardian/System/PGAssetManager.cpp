@@ -4,6 +4,8 @@
 #include "PGAssetManager.h"
 #include "AbilitySystemGlobals.h"
 
+const FPrimaryAssetType UPGAssetManager::EffectBundleType = TEXT("EffectBundle");
+
 UPGAssetManager& UPGAssetManager::Get()
 {
 	static auto* const AssetManager = Cast<UPGAssetManager>(&UAssetManager::Get());

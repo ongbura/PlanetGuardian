@@ -8,11 +8,16 @@
 #include "AbilitySystem/PGAbilitySystemComponent.h"
 #include "AbilitySystem/AttributeSet/PGJetpackPowerSet.h"
 
-void APGGuardianController::MakeHUDVisible(UPGAbilitySystemComponent* ASC) const
+void APGGuardianController::MakeHUDVisible(UPGAbilitySystemComponent* ASC)
 {
 	if (HasAuthority() || ASC == nullptr)
 	{
 		return;
+	}
+
+	if (HUD == nullptr)
+	{
+		CreateHUD();
 	}
 	
 	HUD->AddToViewport();
@@ -44,4 +49,11 @@ void APGGuardianController::MakeHUDInvisible() const
 	{
 		HUD->RemoveFromParent();
 	}
+}
+
+void APGGuardianController::CreateHUD()
+{
+	check(HUDClass);
+
+	HUD = CreateWidget<UPGHUD>(this, HUDClass);
 }

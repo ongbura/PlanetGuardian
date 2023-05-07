@@ -77,3 +77,8 @@ DerivedDataCache/*
 .vsconfig
 
 Platforms/*
+
+Package/*
+
+RunClient.bat
+RunServer.bat

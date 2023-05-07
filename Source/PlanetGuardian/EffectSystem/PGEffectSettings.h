@@ -12,9 +12,6 @@ struct FPGEffectSettings_VFX
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="Niagara Effect"))
-	TSoftObjectPtr<UNiagaraSystem> NiagaraFX;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector LocationOffset { FVector::ZeroVector };
 
@@ -32,9 +29,6 @@ struct FPGEffectSettings_SFX
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="Sound Effect"))
-	TSoftObjectPtr<USoundBase> SoundFX;
-	
 	// Volume Multiplier
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
 	float VolumeMultiplier = 1.0f;

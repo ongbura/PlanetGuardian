@@ -3,7 +3,7 @@
 
 #include "PGEffectEmitterPool.h"
 #include "PGEffectEmitter.h"
-#include "Subsystem/PGActorPoolSubsystem.h"
+#include "PGEffectEmitterPoolSubsystem.h"
 #include "System/PGDeveloperSettings.h"
 
 APGEffectEmitterPool::APGEffectEmitterPool()
@@ -56,7 +56,7 @@ void APGEffectEmitterPool::BeginPlay()
 		GenerateEffectEmitters(Settings->NumInitialEffectEmitters);
 	}
 
-	if (auto* PoolSubsystem = GetWorld()->GetSubsystem<UPGActorPoolSubsystem>())
+	if (auto* PoolSubsystem = GetWorld()->GetSubsystem<UPGEffectEmitterPoolSubsystem>())
 	{
 		PoolSubsystem->SetEffectEmitterPool(this);
 	}

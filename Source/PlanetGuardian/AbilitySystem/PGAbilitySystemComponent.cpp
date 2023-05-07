@@ -3,37 +3,77 @@
 
 #include "PGAbilitySystemComponent.h"
 #include "EnhancedInputComponent.h"
-#include "System/PGDeveloperSettings.h"
+#include "PGAbilitySystemGlobals.h"
+#include "Input/PGAbilityInputData.h"
+#include "InputAction.h"
 
 UPGAbilitySystemComponent::UPGAbilitySystemComponent()
 {
+	AbilityInputHandles.Reserve(UPGAbilityInputData::MaxNumAbilityInputSet);
 }
 
-void UPGAbilitySystemComponent::RemoveBoundAttributeChangedDelegate(const UPGAttributeSet* AttributeSet)
+int32 UPGAbilitySystemComponent::GetSystemGlobalLevel()
 {
-	const auto& AttributeSetTag = AttributeSet->GetAttributeSetTag();
-	AttributeChangedDelegateHandles.Remove(AttributeSetTag);
+	return UPGAbilitySystemGlobals::SystemGlobalLevel;
 }
 
-void UPGAbilitySystemComponent::BindDefaultAbilitiesToInputComponent(UEnhancedInputComponent* EIC)
+void UPGAbilitySystemComponent::BindAbilityToInput(const int32 InputID, const UInputAction* InputAction,
+                                                   UEnhancedInputComponent* EIC)
 {
-	if (bAreAbilitiesBoundToInput)
+	if (EIC == nullptr || InputAction == nullptr)
 	{
 		return;
 	}
 	
-	auto* Settings = GetDefault<UPGDeveloperSettings>();
+	auto& [OnPressedHandle, OnReleasedHandle] = AbilityInputHandles.Add(InputID);
 
-	for (const auto& [SoftAbility, SoftInputAction, InputID] : Settings->DefaultAbilities)
+	OnPressedHandle = &EIC->BindAction(InputAction, ETriggerEvent::Triggered, this, &ThisClass::OnAbilityInputPressed, InputID);
+	OnReleasedHandle = &EIC->BindAction(InputAction, ETriggerEvent::Started, this, &ThisClass::OnAbilityInputReleased, InputID);
+}
+
+void UPGAbilitySystemComponent::UnbindAbilityFromInput(const int32 InputID, UEnhancedInputComponent* EIC)
+{
+	if (EIC == nullptr)
 	{
-		const auto* InputAction = SoftInputAction.LoadSynchronous();
-
-		auto& [OnPressedHandle, OnReleasedHandle] = AbilityInputHandles.Add(InputID);
-		OnPressedHandle = &EIC->BindAction(InputAction, ETriggerEvent::Triggered, this, &ThisClass::OnAbilityInputPressed, InputID);
-		OnReleasedHandle = &EIC->BindAction(InputAction, ETriggerEvent::Completed, this, &ThisClass::OnAbilityInputReleased, InputID);
+		return;
 	}
 
-	bAreAbilitiesBoundToInput = true;
+	FPGAbilityInputHandle HandleSet;
+	
+	AbilityInputHandles.RemoveAndCopyValue(InputID, HandleSet);
+
+	EIC->RemoveBinding(*HandleSet.OnPressedHandle);
+	EIC->RemoveBinding(*HandleSet.OnReleasedHandle);
+}
+
+void UPGAbilitySystemComponent::BindAbilitiesToInput(const UPGAbilityInputData* AbilityInputData,
+                                                     UEnhancedInputComponent* EIC)
+{
+	if (EIC == nullptr || AbilityInputData == nullptr)
+	{
+		return;
+	}
+	
+	for (const auto& InputSet : AbilityInputData->GetAbilityInputSets())
+	{
+		BindAbilityToInput(InputSet.InputID, InputSet.SoftInputAction.LoadSynchronous(), EIC);
+	}
+}
+
+void UPGAbilitySystemComponent::ClearAbilitiesFromInput(UEnhancedInputComponent* EIC)
+{
+	if (EIC == nullptr)
+	{
+		return;
+	}
+	
+	for (const auto& HandleSets : AbilityInputHandles)
+	{
+		EIC->RemoveBinding(*HandleSets.Value.OnPressedHandle);
+		EIC->RemoveBinding(*HandleSets.Value.OnReleasedHandle);
+	}
+
+	AbilityInputHandles.Empty();
 }
 
 void UPGAbilitySystemComponent::OnGiveAbility(FGameplayAbilitySpec& AbilitySpec)

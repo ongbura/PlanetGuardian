@@ -3,10 +3,13 @@
 
 #include "PGAnimNotify_EffectsEmitter.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Cosmetics/PGEffectEmitter.h"
-#include "Cosmetics/PGEffectEmitterPool.h"
+#include "EffectSystem/PGEffectBundle.h"
+#include "EffectSystem/PGEffectEmitter.h"
+#include "EffectSystem/PGEffectEmitterPool.h"
 #include "Kismet/GameplayStatics.h"
-#include "Subsystem/PGActorPoolSubsystem.h"
+#include "EffectSystem/PGEffectEmitterPoolSubsystem.h"
+#include "EffectSystem/PGEffectSubsystem.h"
+#include "System/PGAssetManager.h"
 
 FString UPGAnimNotify_EffectsEmitter::GetNotifyName_Implementation() const
 {
@@ -27,25 +30,85 @@ void UPGAnimNotify_EffectsEmitter::Notify(USkeletalMeshComponent* MeshComp, UAni
 		return;
 	}
 
-	const auto* PoolSubsystem = World->GetSubsystem<UPGActorPoolSubsystem>();
-	if (PoolSubsystem == nullptr || PoolSubsystem->GetEffectEmitterPool() == nullptr)
-	{
-		auto* VisualFX = VFXSettings.NiagaraFX.LoadSynchronous();
-		auto* SoundFX = SFXSettings.SoundFX.LoadSynchronous();
-		
-		SpawnSound(SoundFX, MeshComp, Animation);
-		SpawnNiagaraEffect(VisualFX, MeshComp, Animation);
-		Super::Notify(MeshComp, Animation, EventReference);
+	const auto& AssetManager = UAssetManager::Get();
 
+	if (World->WorldType == EWorldType::EditorPreview)
+	{
+		const auto* Bundle = Cast<UPGEffectBundle>(AssetManager.GetPrimaryAssetPath(EffectBundle).TryLoad());
+		if (Bundle == nullptr)
+		{
+			return;
+		}
+
+		const auto VisualFXPath = Bundle->GetSoftVisualFXPath();
+		if (VisualFXPath.IsValid())
+		{
+			if (auto* VisualFX = Cast<UNiagaraSystem>(Bundle->GetSoftVisualFXPath().TryLoad()))
+			{
+				SpawnNiagaraEffect(VisualFX, MeshComp, Animation);
+			}
+		}
+
+		const auto SoundFXPath = Bundle->GetSoftSoundFXPath();
+		if (SoundFXPath.IsValid())
+		{
+			if (auto* SoundFX = Cast<USoundBase>(Bundle->GetSoftSoundFXPath().TryLoad()))
+			{
+				SpawnSound(SoundFX, MeshComp, Animation);
+			}
+		}
+		
+		Super::Notify(MeshComp, Animation, EventReference);
+		
+		return;
+	}
+	
+	const auto* PoolSubsystem = World->GetSubsystem<UPGEffectEmitterPoolSubsystem>();
+	if (PoolSubsystem == nullptr || PoolSubsystem->GetEffectEmitterPool() == nullptr)
+	{		
+		return;
+	}
+
+	const auto BundlePath = AssetManager.GetPrimaryAssetPath(EffectBundle);
+	if (!BundlePath.IsValid())
+	{
+		return;
+	}
+
+	const auto* Bundle = AssetManager.GetPrimaryAssetObject<UPGEffectBundle>(EffectBundle);
+	if (Bundle == nullptr)
+	{
+		Bundle = CastChecked<UPGEffectBundle>(BundlePath.TryLoad());
+		check(Bundle);
+	}
+
+	auto* EffectSubsystem = UPGEffectSubsystem::Get();
+	if (EffectSubsystem == nullptr)
+	{
+		return;
+	}
+
+	auto* VisualFX = EffectSubsystem->GetVisualFX(Bundle->GetSoftVisualFXPath());
+	auto* SoundFX = EffectSubsystem->GetSoundFX(Bundle->GetSoftSoundFXPath());
+
+	if (VisualFX == nullptr && SoundFX == nullptr)
+	{
 		return;
 	}
 	
 	auto* Emitter = PoolSubsystem->GetEffectEmitterPool()->PopEffectEmitter();
 	check(Emitter);
 
-	Emitter->SetVisualEffectSettings(VFXSettings);
-	Emitter->SetSoundEffectSettings(SFXSettings);
+	if (VisualFX)
+	{
+		Emitter->SetVisualEffectSettings(VisualFX, VFXSettings);
+	}
 
+	if (SoundFX)
+	{
+		Emitter->SetSoundEffectSettings(SoundFX, SFXSettings);
+	}
+	
 	if (bShouldAttached)
 	{
 		Emitter->Activate(MeshComp, SocketName);

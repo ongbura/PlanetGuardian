@@ -16,6 +16,11 @@ void UPGGuardianMovementComponent::Sprint()
 	bToggledSprint = true;
 }
 
+bool UPGGuardianMovementComponent::CanSprint() const
+{
+	return (MovementMode == MOVE_Walking || MovementMode == MOVE_NavWalking) && !IsCrouching() && !IsFalling();
+}
+
 void UPGGuardianMovementComponent::StopSprinting()
 {
 	bWantToSprint = false;
@@ -30,20 +35,21 @@ FNetworkPredictionData_Client* UPGGuardianMovementComponent::GetPredictionData_C
 	{
 		auto* MutableThis = const_cast<UPGGuardianMovementComponent*>(this);
 		MutableThis->ClientPredictionData = new FNetworkPredictionData_Client_Guardian(*this);
+		check(ClientPredictionData);
 	}
 
 	return ClientPredictionData;
 }
 
-void UPGGuardianMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
+void UPGGuardianMovementComponent::UpdateFromCompressedFlags(const uint8 Flags)
 {
 	Super::UpdateFromCompressedFlags(Flags);
 
 	bWantToSprint = (Flags & FSavedMove_Character::FLAG_Custom_0) != 0;
 }
 
-void UPGGuardianMovementComponent::OnMovementUpdated(float DeltaSeconds, const FVector& OldLocation,
-	const FVector& OldVelocity)
+void UPGGuardianMovementComponent::OnMovementUpdated(const float DeltaSeconds, const FVector& OldLocation,
+                                                     const FVector& OldVelocity)
 {
 	Super::OnMovementUpdated(DeltaSeconds, OldLocation, OldVelocity);
 
@@ -94,7 +100,7 @@ uint8 FSavedMove_Guardian::GetCompressedFlags() const
 }
 
 void FSavedMove_Guardian::SetMoveFor(ACharacter* C, float InDeltaTime, FVector const& NewAccel,
-	FNetworkPredictionData_Client_Character& ClientData)
+                                     FNetworkPredictionData_Client_Character& ClientData)
 {
 	FSavedMove_Character::SetMoveFor(C, InDeltaTime, NewAccel, ClientData);
 
@@ -114,7 +120,8 @@ void FSavedMove_Guardian::PrepMoveFor(ACharacter* C)
 	}
 }
 
-FNetworkPredictionData_Client_Guardian::FNetworkPredictionData_Client_Guardian(const UCharacterMovementComponent& ClientMovement)
+FNetworkPredictionData_Client_Guardian::FNetworkPredictionData_Client_Guardian(
+	const UCharacterMovementComponent& ClientMovement)
 	: FNetworkPredictionData_Client_Character(ClientMovement)
 {
 }

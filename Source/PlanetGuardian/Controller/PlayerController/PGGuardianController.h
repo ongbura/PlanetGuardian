@@ -21,9 +21,12 @@ class PLANETGUARDIAN_API APGGuardianController : public APGPlayerController
 	TObjectPtr<UPGHUD> HUD;
 
 public:
-	void MakeHUDVisible(UPGAbilitySystemComponent* ASC) const;
+	void MakeHUDVisible(UPGAbilitySystemComponent* ASC);
 
 	void MakeHUDInvisible() const;
 
 	UPGHUD* GetPGHUD() const { return HUD; }
+
+private:
+	void CreateHUD();
 };

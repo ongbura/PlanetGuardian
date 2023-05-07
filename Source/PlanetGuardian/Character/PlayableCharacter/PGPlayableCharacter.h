@@ -7,32 +7,34 @@
 #include "Character/Common/PGCharacter.h"
 #include "PGPlayableCharacter.generated.h"
 
+struct FInputActionValue;
 class USpringArmComponent;
 class UCameraComponent;
 class UPGAbilitySystemComponent;
 class UPGAvatarComponent;
 class UPGHealthSetComponent;
-
-
-
+class UPGNativeInputData;
 
 UCLASS()
 class PLANETGUARDIAN_API APGPlayableCharacter : public APGCharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
-	
+
 protected:
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Components")
 	TObjectPtr<USpringArmComponent> CameraBoom;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Components")
 	TObjectPtr<UCameraComponent> FollowCamera;
-	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="AbilitySystem")
 	TObjectPtr<UPGAvatarComponent> AvatarComponent;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="AbilitySystem")
 	TObjectPtr<UPGHealthSetComponent> HealthComponent;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Input")
+	TObjectPtr<UPGNativeInputData> NativeInputData;
 
 public:
 	explicit APGPlayableCharacter(const FObjectInitializer& ObjectInitializer);
@@ -45,10 +47,21 @@ public:
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	
+
 	virtual void PossessedBy(AController* NewController) override;
 
 	virtual void OnRep_PlayerState() override;
 
 	virtual void OnRep_Controller() override;
+
+private:
+	/**
+	* @brief Keyboard wasd Movement
+	*/
+	void Move(const FInputActionValue& Value);
+
+	/**
+	 * @brief Mouse look
+	 */
+	void Look(const FInputActionValue& Value);
 };

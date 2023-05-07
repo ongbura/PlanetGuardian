@@ -6,10 +6,13 @@
 #include "Engine/AssetManager.h"
 #include "PGAssetManager.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class PLANETGUARDIAN_API UPGAssetManager : public UAssetManager
 {
 	GENERATED_BODY()
+
+public:
+	static const FPrimaryAssetType EffectBundleType;
 
 public:
 	static UPGAssetManager& Get();

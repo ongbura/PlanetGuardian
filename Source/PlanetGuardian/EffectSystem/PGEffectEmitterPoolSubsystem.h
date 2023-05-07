@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PGWorldSubsystem.h"
-#include "PGActorPoolSubsystem.generated.h"
+#include "Subsystem/PGWorldSubsystem.h"
+#include "PGEffectEmitterPoolSubsystem.generated.h"
 
 
 class APGEffectEmitterPool;
 
 UCLASS()
-class PLANETGUARDIAN_API UPGActorPoolSubsystem : public UPGWorldSubsystem
+class PLANETGUARDIAN_API UPGEffectEmitterPoolSubsystem : public UPGWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -23,5 +23,7 @@ public:
 	APGEffectEmitterPool* GetEffectEmitterPool() const;
 
 protected:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 };

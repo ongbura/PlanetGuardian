@@ -3,11 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PGEffectSettings.h"
+#include "EffectSystem/PGEffectSettings.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "PGAnimNotify_EffectsEmitter.generated.h"
-
-class UPGEffectSetData;
 
 UCLASS(Abstract, HideCategories=Object, CollapseCategories)
 class PLANETGUARDIAN_API UPGAnimNotify_EffectsEmitter : public UAnimNotify
@@ -16,6 +14,9 @@ class PLANETGUARDIAN_API UPGAnimNotify_EffectsEmitter : public UAnimNotify
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FString NotifyDisplayName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	FPrimaryAssetId EffectBundle;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	FPGEffectSettings_VFX VFXSettings;

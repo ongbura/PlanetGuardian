@@ -5,9 +5,8 @@
 #include "NiagaraComponent.h"
 #include "PGEffectEmitterPool.h"
 #include "Components/AudioComponent.h"
-#include "FeedBack/PGEffectSettings.h"
-#include "Subsystem/PGActorPoolSubsystem.h"
-#include "Subsystem/PGEffectSubsystem.h"
+#include "PGEffectSettings.h"
+#include "PGEffectEmitterPoolSubsystem.h"
 #include "ThirdParty/MagicEnum/magic_enum.hpp"
 
 // Sets default values
@@ -45,41 +44,33 @@ void APGEffectEmitter::Activate(USkeletalMeshComponent* TargetMesh, const FName&
 	Activate();
 }
 
-void APGEffectEmitter::SetVisualEffectSettings(const FPGEffectSettings_VFX& VisualFXSettings)
+void APGEffectEmitter::SetVisualEffectSettings(UNiagaraSystem* Asset, const FPGEffectSettings_VFX& VisualFXSettings)
 {
-	auto* EffectSubsystem = UPGEffectSubsystem::Get();
-	if (EffectSubsystem == nullptr)
+	if (Asset == nullptr)
 	{
 		return;
 	}
 
-	if (auto* NiagaraSystem = EffectSubsystem->FindOrLoadNiagaraSystem(VisualFXSettings.NiagaraFX))
-	{
-		AddActorLocalOffset(VisualFXSettings.LocationOffset);
-		AddActorLocalRotation(VisualFXSettings.RotationOffset);
-		SetActorScale3D(VisualFXSettings.Scale);
+	AddActorLocalOffset(VisualFXSettings.LocationOffset);
+	AddActorLocalRotation(VisualFXSettings.RotationOffset);
+	SetActorScale3D(VisualFXSettings.Scale);
 		
-		VisualFX->SetAsset(NiagaraSystem);
-		bSetVisualFX = true;
-	}
+	VisualFX->SetAsset(Asset);
+	bSetVisualFX = true;
 }
 
-void APGEffectEmitter::SetSoundEffectSettings(const FPGEffectSettings_SFX& SoundFXSettings)
+void APGEffectEmitter::SetSoundEffectSettings(USoundBase* Asset, const FPGEffectSettings_SFX& SoundFXSettings)
 {
-	auto* EffectSubsystem = UPGEffectSubsystem::Get();
-	if (EffectSubsystem == nullptr)
+	if (Asset == nullptr)
 	{
 		return;
 	}
 
-	if (auto* Sound = EffectSubsystem->FindOrLoadSoundBase(SoundFXSettings.SoundFX))
-	{
-		SoundFX->VolumeMultiplier = SoundFXSettings.VolumeMultiplier;
-		SoundFX->PitchMultiplier = SoundFXSettings.PitchMultiplier;
+	SoundFX->VolumeMultiplier = SoundFXSettings.VolumeMultiplier;
+	SoundFX->PitchMultiplier = SoundFXSettings.PitchMultiplier;
 		
-		SoundFX->SetSound(Sound);
-		bSetSoundFX = true;
-	}
+	SoundFX->SetSound(Asset);
+	bSetSoundFX = true;
 }
 
 void APGEffectEmitter::BeginPlay()
@@ -154,8 +145,6 @@ void APGEffectEmitter::ResetEffectEmitter()
 	SetActorTickEnabled(false);
 }
 
-
-
 void APGEffectEmitter::OnEndEmissionVisualFX(UNiagaraComponent* PSystem)
 {
 	VisualFX->DeactivateImmediate();
@@ -174,7 +163,9 @@ void APGEffectEmitter::OnEndEmissionSoundFX()
 
 void APGEffectEmitter::TryReturnToEffectEmitterPool()
 {
-	auto* EmitterPool = GetWorld()->GetSubsystem<UPGActorPoolSubsystem>()->GetEffectEmitterPool();
+	ResetEffectEmitter();
+
+	auto* EmitterPool = GetWorld()->GetSubsystem<UPGEffectEmitterPoolSubsystem>()->GetEffectEmitterPool();
 	check(EmitterPool);
 
 	switch (EmitterMode)
@@ -196,6 +187,5 @@ void APGEffectEmitter::TryReturnToEffectEmitterPool()
 		checkNoEntry();
 	}
 
-	ResetEffectEmitter();
 	EmitterPool->PushEffectEmitter(this);
 }

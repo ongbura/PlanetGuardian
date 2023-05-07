@@ -3,7 +3,7 @@
 
 #include "PGGameplayAbility.h"
 #include "AbilitySystemComponent.h"
-#include "AbilitySystem/PGAbilitySystemComponent.h"
+#include "AbilitySystem/PGAbilitySystemGlobals.h"
 
 UPGGameplayAbility::UPGGameplayAbility()
 {
@@ -24,7 +24,7 @@ UPGGameplayAbility::UPGGameplayAbility()
 
 int32 UPGGameplayAbility::GetSystemGlobalLevel()
 {
-	return UPGAbilitySystemComponent::SystemGlobalLevel;
+	return UPGAbilitySystemGlobals::SystemGlobalLevel;
 }
 
 void UPGGameplayAbility::OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)

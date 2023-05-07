@@ -61,7 +61,7 @@ void FPGGuardianAnimInstanceProxy::Update(float DeltaSeconds)
 {
 	FAnimInstanceProxy::Update(DeltaSeconds);
 
-	auto* Data = AnimInstance->BackAnimData;
+	auto& Data = AnimInstance->BackAnimData;
 
 	if (!MovementComp.IsValid() || !CapsuleComp.IsValid())
 	{
@@ -88,10 +88,10 @@ void FPGGuardianAnimInstanceProxy::Update(float DeltaSeconds)
 void FPGGuardianAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 {
 	FAnimInstanceProxy::PostUpdate(InAnimInstance);
-	
-	auto* FrontAnimData = AnimInstance->AnimData;
+
+	auto* TempData = AnimInstance->AnimData;
 	AnimInstance->AnimData = AnimInstance->BackAnimData;
-	AnimInstance->BackAnimData = FrontAnimData;
+	AnimInstance->BackAnimData = TempData;
 }
 
 void FPGGuardianAnimInstanceProxy::CalculateLeanAmount(UPGGuardianAnimData* Data, const FRotator& InCurrentRotation, const float DeltaSeconds)
@@ -108,8 +108,13 @@ void UPGGuardianAnimInstance::NativeInitializeAnimation()
 
 	bUseMultiThreadedAnimationUpdate = true;
 
-	AnimData = NewObject<UPGGuardianAnimData>();
-	BackAnimData = NewObject<UPGGuardianAnimData>();
+	AnimData = NewObject<UPGGuardianAnimData>(this);
+	BackAnimData = NewObject<UPGGuardianAnimData>(this);
+}
+
+void UPGGuardianAnimInstance::NativeUninitializeAnimation()
+{
+	Super::NativeUninitializeAnimation();
 }
 
 FAnimInstanceProxy* UPGGuardianAnimInstance::CreateAnimInstanceProxy()

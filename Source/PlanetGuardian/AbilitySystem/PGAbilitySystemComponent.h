@@ -9,15 +9,16 @@
 
 class UEnhancedInputComponent;
 struct FEnhancedInputActionEventBinding;
+class UPGAbilityInputData;
+class UInputAction;
 
 USTRUCT()
 struct FPGAbilityInputHandle
 {
 	GENERATED_BODY()
 
-	FEnhancedInputActionEventBinding* OnPressedHandle {};
-
-	FEnhancedInputActionEventBinding* OnReleasedHandle {};
+	FEnhancedInputActionEventBinding* OnPressedHandle;
+	FEnhancedInputActionEventBinding* OnReleasedHandle;
 };
 
 UCLASS()
@@ -25,27 +26,20 @@ class PLANETGUARDIAN_API UPGAbilitySystemComponent : public UAbilitySystemCompon
 {
 	GENERATED_BODY()
 
-public:
-	inline static constexpr int32 SystemGlobalLevel { 1 };
-	
-private:
-	TMap<FGameplayTag, TArray<FDelegateHandle>> AttributeChangedDelegateHandles;
-
 	TMap<int32, FPGAbilityInputHandle> AbilityInputHandles;
-
-	bool bAreAbilitiesBoundToInput;
 	
 public:
 	UPGAbilitySystemComponent();
 
-	static int32 GetSystemGlobalLevel() { return SystemGlobalLevel; } 
+	static int32 GetSystemGlobalLevel();
 
-	template <typename UserClass, typename FuncType>
-	void BindAttributeChangedDelegate(const UPGAttributeSet* AttributeSet, const FGameplayAttribute& Attribute, UserClass* User, FuncType Func);
+	void BindAbilityToInput(const int32 InputID, const UInputAction* InputAction, UEnhancedInputComponent* EIC);
 
-	void RemoveBoundAttributeChangedDelegate(const UPGAttributeSet* AttributeSet);
+	void UnbindAbilityFromInput(const int32 InputID, UEnhancedInputComponent* EIC);
 
-	void BindDefaultAbilitiesToInputComponent(UEnhancedInputComponent* EIC);
+	void BindAbilitiesToInput(const UPGAbilityInputData* AbilityInputData, UEnhancedInputComponent* EIC);
+
+	void ClearAbilitiesFromInput(UEnhancedInputComponent* EIC);
 
 protected:
 	virtual void OnGiveAbility(FGameplayAbilitySpec& AbilitySpec) override;
@@ -57,19 +51,3 @@ private:
 
 	void OnAbilityInputReleased(int32 InputID);
 };
-
-template <typename UserClass, typename FuncType>
-void UPGAbilitySystemComponent::BindAttributeChangedDelegate(const UPGAttributeSet* AttributeSet, const FGameplayAttribute& Attribute, UserClass* User, FuncType Func)
-{
-	const auto& AttributeSetTag = AttributeSet->GetAttributeSetTag();	
-	const auto Handle = GetGameplayAttributeValueChangeDelegate(Attribute).AddUObject(User, Forward(Func));
-
-	if (AttributeChangedDelegateHandles.Contains(AttributeSetTag))
-	{
-		AttributeChangedDelegateHandles[AttributeSetTag].Add(MoveTemp(Handle));
-	}
-	else
-	{
-		AttributeChangedDelegateHandles.Add(AttributeSetTag, { MoveTemp(Handle) });
-	}
-}

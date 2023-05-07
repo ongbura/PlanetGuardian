@@ -5,6 +5,11 @@
 #include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
 #include "Character/Guardian/PGGuardianMovementComponent.h"
 
+UPGGameplayAbility_Sprint::UPGGameplayAbility_Sprint()
+{
+	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
+}
+
 void UPGGameplayAbility_Sprint::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                                 const FGameplayAbilityActorInfo* ActorInfo,
                                                 const FGameplayAbilityActivationInfo ActivationInfo,
@@ -13,7 +18,7 @@ void UPGGameplayAbility_Sprint::ActivateAbility(const FGameplayAbilitySpecHandle
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 	bShouldSprint = true;
 
-	if (SprintEffectClass->IsValidLowLevel())
+	if (SprintEffectClass != nullptr)
 	{
 		const auto* Effect = SprintEffectClass->GetDefaultObject<UGameplayEffect>();
 		SprintEffectHandle = ApplyGameplayEffectToOwner(Handle, ActorInfo, ActivationInfo, Effect, GetSystemGlobalLevel());
@@ -22,12 +27,37 @@ void UPGGameplayAbility_Sprint::ActivateAbility(const FGameplayAbilitySpecHandle
 	// TODO: Add GameplayCue to owner which removed on ability end.
 
 	auto* CMC = Cast<UPGGuardianMovementComponent>(ActorInfo->MovementComponent);
-	CMC->Sprint();
-
-	UAbilityTask_WaitInputRelease* WaitInputReleaseTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this, true);
+	check(CMC);
 	
-	WaitInputReleaseTask->OnRelease.AddDynamic(this, &UPGGameplayAbility_Sprint::OnSprintKeyReleased);
-	WaitInputReleaseTask->ReadyForActivation();
+	CMC->Sprint();
+}
+
+bool UPGGameplayAbility_Sprint::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags,
+	const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
+{
+	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
+	{
+		return false;
+	}
+
+	if (!ActorInfo || !ActorInfo->MovementComponent.IsValid())
+	{
+		return false;
+	}
+
+	const auto* CMC = Cast<UPGGuardianMovementComponent>(ActorInfo->MovementComponent.Get());
+	check(CMC);
+
+	return CMC->CanSprint();
+}
+
+void UPGGameplayAbility_Sprint::InputReleased(const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
+{
+	Super::InputReleased(Handle, ActorInfo, ActivationInfo);
+
+	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 }
 
 void UPGGameplayAbility_Sprint::EndAbility(const FGameplayAbilitySpecHandle Handle,
@@ -43,12 +73,7 @@ void UPGGameplayAbility_Sprint::EndAbility(const FGameplayAbilitySpecHandle Hand
 	}
 
 	auto* CMC = Cast<UPGGuardianMovementComponent>(ActorInfo->MovementComponent);
+	check(CMC);
+	
 	CMC->StopSprinting();
-}
-
-void UPGGameplayAbility_Sprint::OnSprintKeyReleased(float TimeHeld)
-{
-	bShouldSprint = false;
-
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
 }

@@ -6,6 +6,7 @@
 #include "Character/PlayableCharacter/PGPlayableCharacter.h"
 #include "PGGuardian.generated.h"
 
+class UPGAbilityInputData;
 struct FInputActionValue;
 class UPGJetpackPowerSetComponent;
 class UPGGuardianMovementComponent;
@@ -32,19 +33,22 @@ class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Jetpack", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UAudioComponent> JetpackSoundEffect;
-	
-	bool bIsJetpackActivated{ false };
-	float ThrusterTime{ 0.f};
+
+	bool bIsJetpackActivated { false };
+	float ThrusterTime { 0.f };
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Jetpack", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UCurveFloat> JetpackBoostCurve;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Jetpack", meta=(AllowPrivateAccess="true"))
-	float ThrusterMaxTime{ 2.f};
+	float ThrusterMaxTime { 2.f };
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UPGAbilityInputData> AbilityInputData;
 
 public:
 	explicit APGGuardian(const FObjectInitializer& ObjectInitializer);
-	
+
 	/**
 	 * @brief The jetpack can be started, stopped and reset here.
 	 * This is called by the jump input when in air or reset when landed.
@@ -70,7 +74,7 @@ private:
 	 * @brief Update CameraBoom TargetArmLength
 	 */
 	void UpdateCamera(float DeltaSeconds);
-	
+
 	/**
 	 * @brief Update Jetpack, called from tick function to decrease the thruster time. Using a curve asset to get the Z force applied on the character.
 	 */
@@ -80,17 +84,4 @@ private:
 
 	UFUNCTION()
 	void OnLandedToggleJetpack(const FHitResult& Hit);
-
-	/**
-	 * @brief Keyboard wasd Movement
-	 */
-	void Move(const FInputActionValue& Value);
-	
-	/**
-	 * @brief Mouse look
-	 */
-	void Look(const FInputActionValue& Value);
-
-	UFUNCTION(Server, Reliable)
-	void ServerGrantDefaultAbilitiesAndApplyInitialEffects();
 };

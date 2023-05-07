@@ -10,7 +10,6 @@ UPGHealthSet::UPGHealthSet()
 	AttributeSetTag = GNativeTags.Attribute_Common_Health;
 }
 
-
 void UPGHealthSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

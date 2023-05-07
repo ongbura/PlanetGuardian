@@ -19,6 +19,8 @@ public:
 	T* Get(const UObject* WorldContextObject);
 
 protected:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override { return false; }
 };
 

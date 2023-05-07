@@ -12,5 +12,5 @@ class PLANETGUARDIAN_API APGCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	APGCharacter(const FObjectInitializer& Initializer);
+	explicit APGCharacter(const FObjectInitializer& Initializer);
 };

@@ -8,13 +8,13 @@
 #include "PGGuardianMovementComponent.h"
 #include "PGJetpackPowerSetComponent.h"
 #include "AbilitySystem/PGAbilitySystemComponent.h"
-#include "AbilitySystem/Ability/PGGameplayAbility.h"
 #include "Components/AudioComponent.h"
 #include "Controller/PlayerController/PGGuardianController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Input/PGAbilityInputData.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "System/PGDeveloperSettings.h"
+#include "InputMappingContext.h"
 
 APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UPGGuardianMovementComponent>(CharacterMovementComponentName))
@@ -74,49 +74,43 @@ void APGGuardian::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	auto* Settings = GetDefault<UPGDeveloperSettings>();
-	check(Settings);
-
 	const auto* PC = GetController<APlayerController>();
 	check(PC);
 
 	auto* EIS = PC->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	check(EIS);
 
-	EIS->AddMappingContext(Settings->InputMappingContext.LoadSynchronous(), 0);
-
-	auto* EIC = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
-	EIC->BindAction(Settings->MoveInputAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &APGGuardian::Move);
-	EIC->BindAction(Settings->LookInputAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &APGGuardian::Look);
-
+	for (const auto& SoftMappingContext : AbilityInputData->GetSoftAbilityInputMappingContexts())
+	{
+		if (const auto* MappingContext = SoftMappingContext.Key.LoadSynchronous())
+		{
+			const auto Priority = SoftMappingContext.Value;
+			EIS->AddMappingContext(MappingContext, Priority);
+		}
+	}
+	
 	if (auto* AbilitySystem = GetPGAbilitySystemComponent())
 	{
-		AbilitySystem->BindDefaultAbilitiesToInputComponent(EIC);
+		AbilitySystem->BindAbilitiesToInput(AbilityInputData, Cast<UEnhancedInputComponent>(InputComponent));
 	}
 }
 
 void APGGuardian::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-
-	// Grant Abilities	
 }
 
 void APGGuardian::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	ServerGrantDefaultAbilitiesAndApplyInitialEffects();
-
-	if (auto* PC = GetController<APGGuardianController>())
+	if (InputComponent == nullptr)
 	{
-		PC->MakeHUDVisible(GetPGAbilitySystemComponent());
+		return;
 	}
 
-	if (auto* EIC = Cast<UEnhancedInputComponent>(InputComponent))
-	{
-		GetPGAbilitySystemComponent()->BindDefaultAbilitiesToInputComponent(EIC);
-	}
+	auto* AbilitySystem = GetPGAbilitySystemComponent();
+	AbilitySystem->BindAbilitiesToInput(AbilityInputData, Cast<UEnhancedInputComponent>(InputComponent));
 }
 
 void APGGuardian::OnRep_Controller()
@@ -144,6 +138,8 @@ void APGGuardian::Tick(float DeltaTime)
 
 	// UpdateCamera(DeltaTime);
 	UpdateJetpack(DeltaTime);
+
+	
 }
 
 void APGGuardian::UpdateCamera(const float DeltaSeconds)
@@ -205,67 +201,4 @@ void APGGuardian::UpdateJetpack(const float DeltaSeconds)
 void APGGuardian::OnLandedToggleJetpack(const FHitResult& Hit)
 {
 	ToggleJetpack(true, false);
-}
-
-void APGGuardian::Move(const FInputActionValue& Value)
-{
-	const auto MoveInput = Value.Get<FInputActionValue::Axis2D>();
-
-	const FRotator CameraWorldRotation(0.f, GetControlRotation().Yaw, 0.f);
-	const FVector ForwardBasedXInput(FRotationMatrix(CameraWorldRotation).GetScaledAxis(EAxis::X) * MoveInput.X);
-	const FVector RightBasedYInput(FRotationMatrix(CameraWorldRotation).GetScaledAxis(EAxis::Y) * MoveInput.Y);
-
-	FVector DirectionToMove(ForwardBasedXInput + RightBasedYInput);
-	DirectionToMove.Normalize();
-
-	const float MoveAmount = FMath::Abs(MoveInput.X) > FMath::Abs(MoveInput.Y)
-		                         ? FMath::Abs(MoveInput.X)
-		                         : FMath::Abs(MoveInput.Y);
-
-	AddMovementInput(DirectionToMove, MoveAmount);
-}
-
-void APGGuardian::Look(const FInputActionValue& Value)
-{
-	if (auto* PC = Cast<APlayerController>(GetController()))
-	{
-		const auto AxisValue = Value.Get<FInputActionValue::Axis2D>();
-		PC->AddYawInput(AxisValue.X);
-		PC->AddPitchInput(AxisValue.Y);
-	}
-}
-
-void APGGuardian::ServerGrantDefaultAbilitiesAndApplyInitialEffects_Implementation()
-{
-	auto* Settings = GetDefault<UPGDeveloperSettings>();
-
-	for (const auto& AbilitySet : Settings->DefaultAbilities)
-	{
-		if (auto* Ability = Cast<UPGGameplayAbility>(AbilitySet.AbilityClass.LoadSynchronous()))
-		{
-			FGameplayAbilitySpec Spec
-			{
-				Ability,
-				UPGAbilitySystemComponent::SystemGlobalLevel,
-				AbilitySet.InputID,
-				this
-			};
-
-			GetPGAbilitySystemComponent()->GiveAbility(Spec);
-		}
-	}
-
-	auto* AbilitySystem = GetAbilitySystemComponent();
-	auto EffectContext = AbilitySystem->MakeEffectContext();
-	EffectContext.AddSourceObject(this);
-
-	for (const auto& Effect : Settings->InitialEffects)
-	{
-		auto SpecHandle = AbilitySystem->MakeOutgoingSpec(Effect.LoadSynchronous(),
-		                                                  UPGAbilitySystemComponent::SystemGlobalLevel, EffectContext);
-		if (SpecHandle.IsValid())
-		{
-			AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-		}
-	}
 }

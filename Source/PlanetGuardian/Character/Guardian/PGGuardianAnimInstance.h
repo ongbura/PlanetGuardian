@@ -18,37 +18,37 @@ class UPGGuardianAnimData : public UObject
 
 public:
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	float GroundSpeed;
+	float GroundSpeed { 0.f };
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	bool bIsMoving;
+	bool bIsMoving { false };
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	bool bIsAccelerating;
+	bool bIsAccelerating { false };
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	bool bIsInAir;
+	bool bIsInAir { false };
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	bool bIsCrouching;
+	bool bIsCrouching { false };
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	float Direction;
+	float Direction { 0.f };
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	FRotator PreviousRotation;
+	FRotator PreviousRotation { 0.f };
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	float LeanAmount;
+	float LeanAmount { 0.f };
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	bool bIsHovering;
+	bool bIsHovering { false };
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	FVector InteractWorldLocation;
+	FVector InteractWorldLocation { 0.f };
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	bool bIsInactive;	
+	bool bIsInactive { false };
 };
 
 USTRUCT()
@@ -82,17 +82,21 @@ class PLANETGUARDIAN_API UPGGuardianAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	UPGGuardianAnimData* BackAnimData;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	UPGGuardianAnimData* AnimData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	TSubclassOf<UPGCameraShake> CameraShake;
 
+	bool bUsingFrontAnimData { false };
+
 protected:
 	virtual void NativeInitializeAnimation() override;
+
+	virtual void NativeUninitializeAnimation() override;
 
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
 
@@ -100,7 +104,6 @@ private:
 	UFUNCTION()
 	void AnimNotify_ShakeCameraOnLand();
 
-private:
 	friend void FPGGuardianAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const;
 
 	friend struct FPGGuardianAnimInstanceProxy;

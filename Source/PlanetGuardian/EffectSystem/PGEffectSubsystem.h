@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PGGameInstanceSubsystem.h"
+#include "Subsystem/PGGameInstanceSubsystem.h"
 #include "PGEffectSubsystem.generated.h"
 
+class UPGEffectBundle;
 class APGEffectEmitter;
 class UNiagaraSystem;
 class USoundBase;
@@ -24,18 +25,19 @@ class PLANETGUARDIAN_API UPGEffectSubsystem : public UPGGameInstanceSubsystem
 public:
 	static UPGEffectSubsystem* Get();
 
-	UNiagaraSystem* FindOrLoadNiagaraSystem(const TSoftObjectPtr<UNiagaraSystem>& SoftNiagaraSystem);
+	UNiagaraSystem* GetVisualFX(const FSoftObjectPath& SoftVisualFXPath);
 
-	USoundBase* FindOrLoadSoundBase(const TSoftObjectPtr<USoundBase>& SoftSoundBase);
+	USoundBase* GetSoundFX(const FSoftObjectPath& SoftSoundFXPath);
 
 protected:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	virtual bool ShouldCreateSubsystem(UObject* Outer) const override { return true; }
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 
 private:
-	void AsyncLoadVisualSoundEffects();
+	void OnEffectBundlesLoaded(TArray<FPrimaryAssetId> LoadedAssetIds);	
 
-	UFUNCTION()
-	void OnAsyncLoadVisualSoundEffectsComplete(TArray<FAssetData> LoadedEffectData);
+	UNiagaraSystem* ForceLoadVisualFX(const FSoftObjectPath& SoftVisualFXPath);
+
+	USoundBase* ForceLoadSoundFX(const FSoftObjectPath& SoftSoundFXPath);
 };

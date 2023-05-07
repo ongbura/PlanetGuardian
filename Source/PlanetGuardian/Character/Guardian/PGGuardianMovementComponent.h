@@ -24,6 +24,8 @@ public:
 
 	void Sprint();
 
+	bool CanSprint() const;
+
 	void StopSprinting();
 
 protected:

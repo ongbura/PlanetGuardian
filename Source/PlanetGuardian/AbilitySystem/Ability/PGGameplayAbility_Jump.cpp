@@ -36,7 +36,7 @@ bool UPGGameplayAbility_Jump::CanActivateAbility(const FGameplayAbilitySpecHandl
 		return false;
 	}
 
-	const auto* Avatar = Cast<APGPlayableCharacter>(ActorInfo->AvatarActor.Get());
+	const auto* Avatar = Cast<APGGuardian>(ActorInfo->AvatarActor.Get());
 	if (!Avatar || !Avatar->CanJump())
 	{
 		return false;

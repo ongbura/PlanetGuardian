@@ -16,6 +16,10 @@
 #include "InputMappingContext.h"
 #include "PGSpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "AbilitySystem/PGAvatarComponent.h"
+#include "Character/Common/PGHealthSetComponent.h"
+#include "Input/PGNativeInputData.h"
+#include "Multiplayer/PGPlayerState.h"
 
 
 APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
@@ -45,6 +49,19 @@ APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
 
 	JetpackSoundEffect->SetupAttachment(RootComponent);
 	JetpackSoundEffect->SetAutoActivate(false);
+
+	AvatarComponent = CreateDefaultSubobject<UPGAvatarComponent>(TEXT("AvaterComponent"));
+	HealthComponent = CreateDefaultSubobject<UPGHealthSetComponent>(TEXT("HealthComponent"));
+}
+
+UAbilitySystemComponent* APGGuardian::GetAbilitySystemComponent() const
+{
+	return AvatarComponent->GetPGAbilitySystemComponent();
+}
+
+UPGAbilitySystemComponent* APGGuardian::GetPGAbilitySystemComponent() const
+{
+	return AvatarComponent->GetPGAbilitySystemComponent();
 }
 
 void APGGuardian::ToggleJetpack(const bool bReset, const bool bActivate)
@@ -91,6 +108,11 @@ void APGGuardian::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	auto* EIS = PC->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	check(EIS);
 
+	if (const auto* NativeInputMappingContext = NativeInputData->GetSoftNativeInputMappingContext().LoadSynchronous())
+	{
+		EIS->AddMappingContext(NativeInputMappingContext, NativeInputData->GetNativeInputMappingContextPriority());
+	}
+
 	for (const auto& SoftMappingContext : AbilityInputData->GetSoftAbilityInputMappingContexts())
 	{
 		if (const auto* MappingContext = SoftMappingContext.Key.LoadSynchronous())
@@ -98,6 +120,19 @@ void APGGuardian::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 			const auto Priority = SoftMappingContext.Value;
 			EIS->AddMappingContext(MappingContext, Priority);
 		}
+	}
+
+	auto* EIC = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
+	check(EIC);
+
+	if (const auto* MoveAction = NativeInputData->GetSoftMoveInputAction().LoadSynchronous())
+	{
+		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
+	}
+
+	if (const auto* LookAction = NativeInputData->GetSoftLookInputAction().LoadSynchronous())
+	{
+		EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
 	}
 
 	auto* AbilitySystem = GetPGAbilitySystemComponent();
@@ -112,40 +147,53 @@ void APGGuardian::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	auto* AbilitySystem = GetPGAbilitySystemComponent();
-
-	if (AbilityInputData)
+	if (auto* PS = GetPlayerStateChecked<APGPlayerState>())
 	{
-		auto CopiedDefaultAbilities = DefaultAbilities;
-		const auto& AbilityInputSets = AbilityInputData->GetAbilityInputSets();
+		// Initialize the ability system component
+		AvatarComponent->InitializeAbilitySystem(PS->GetPGAbilitySystemComponent(), PS);
 
-		for (const auto& [AbilityClass, SoftInputAction, InputID] : AbilityInputSets)
+		if (GetNetMode() != NM_DedicatedServer && IsLocallyControlled())
 		{
-			if (DefaultAbilities.Contains(AbilityClass))
-			{
-				FGameplayAbilitySpec Spec
-				{
-					AbilityClass,
-					AbilitySystem->GetSystemGlobalLevel(),
-					InputID,
-					this
-				};
+			AvatarComponent->HandlePlayerControllerAssigned();
+		}
+		
+		auto* AbilitySystem = GetPGAbilitySystemComponent();
 
-				AbilitySystem->GiveAbility(Spec);
-				CopiedDefaultAbilities.Remove(AbilityClass);
+		// Give the default abilities
+		// If the ability input data is valid, the abilities are bound to the input
+		if (AbilityInputData)
+		{
+			auto CopiedDefaultAbilities = DefaultAbilities;
+			const auto& AbilityInputSets = AbilityInputData->GetAbilityInputSets();
+
+			for (const auto& [AbilityClass, SoftInputAction, InputID] : AbilityInputSets)
+			{
+				if (DefaultAbilities.Contains(AbilityClass))
+				{
+					FGameplayAbilitySpec Spec
+					{
+						AbilityClass,
+						AbilitySystem->GetSystemGlobalLevel(),
+						InputID,
+						this
+					};
+
+					AbilitySystem->GiveAbility(Spec);
+					CopiedDefaultAbilities.Remove(AbilityClass);
+				}
+			}
+
+			for (const auto& AbilityClass : CopiedDefaultAbilities)
+			{
+				AbilitySystem->GiveAbility({ AbilityClass });
 			}
 		}
-
-		for (const auto& AbilityClass : CopiedDefaultAbilities)
+		else
 		{
-			AbilitySystem->GiveAbility({ AbilityClass });
-		}		
-	}
-	else
-	{
-		for (const auto& AbilityClass : DefaultAbilities)
-		{
-			AbilitySystem->GiveAbility({ AbilityClass });
+			for (const auto& AbilityClass : DefaultAbilities)
+			{
+				AbilitySystem->GiveAbility({ AbilityClass });
+			}
 		}
 	}
 }
@@ -153,6 +201,8 @@ void APGGuardian::PossessedBy(AController* NewController)
 void APGGuardian::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
+
+	AvatarComponent->HandlePlayerStateAssigned();
 
 	if (AbilityInputData == nullptr || InputComponent != nullptr)
 	{
@@ -167,6 +217,8 @@ void APGGuardian::OnRep_Controller()
 {
 	Super::OnRep_Controller();
 
+	AvatarComponent->HandlePlayerControllerAssigned();
+	
 	if (auto* PC = GetController<APGGuardianController>())
 	{
 		PC->MakeHUDVisible(GetPGAbilitySystemComponent());
@@ -249,4 +301,32 @@ void APGGuardian::UpdateJetpack(const float DeltaSeconds)
 void APGGuardian::OnLandedToggleJetpack(const FHitResult& Hit)
 {
 	ToggleJetpack(true, false);
+}
+
+void APGGuardian::Move(const FInputActionValue& Value)
+{
+	const auto MoveInput = Value.Get<FInputActionValue::Axis2D>();
+
+	const FRotator CameraWorldRotation(0.f, GetControlRotation().Yaw, 0.f);
+	const FVector ForwardBasedXInput(FRotationMatrix(CameraWorldRotation).GetScaledAxis(EAxis::X) * MoveInput.X);
+	const FVector RightBasedYInput(FRotationMatrix(CameraWorldRotation).GetScaledAxis(EAxis::Y) * MoveInput.Y);
+
+	FVector DirectionToMove(ForwardBasedXInput + RightBasedYInput);
+	DirectionToMove.Normalize();
+
+	const float MoveAmount = FMath::Abs(MoveInput.X) > FMath::Abs(MoveInput.Y)
+								 ? FMath::Abs(MoveInput.X)
+								 : FMath::Abs(MoveInput.Y);
+
+	AddMovementInput(DirectionToMove, MoveAmount);
+}
+
+void APGGuardian::Look(const FInputActionValue& Value)
+{
+	if (auto* PC = Cast<APlayerController>(GetController()))
+	{
+		const auto AxisValue = Value.Get<FInputActionValue::Axis2D>();
+		PC->AddYawInput(AxisValue.X);
+		PC->AddPitchInput(AxisValue.Y);
+	}
 }

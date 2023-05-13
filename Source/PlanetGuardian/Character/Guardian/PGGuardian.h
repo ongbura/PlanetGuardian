@@ -3,9 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/PlayableCharacter/PGPlayableCharacter.h"
+#include "AbilitySystemInterface.h"
+#include "Character/Common/PGCharacter.h"
 #include "PGGuardian.generated.h"
 
+class UPGNativeInputData;
+class UPGHealthSetComponent;
+class UPGAvatarComponent;
+class UPGAbilitySystemComponent;
 class UCameraComponent;
 class UPGSpringArmComponent;
 class UGameplayEffect;
@@ -19,14 +24,14 @@ class UAudioComponent;
 class UCurveFloat;
 
 UCLASS()
-class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
+class PLANETGUARDIAN_API APGGuardian final : public APGCharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Components", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Camera", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UPGSpringArmComponent> CameraBoom;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Components", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Camera", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Movement", meta=(AllowPrivateAccess="true"))
@@ -53,6 +58,15 @@ class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Jetpack", meta=(AllowPrivateAccess="true"))
 	float ThrusterMaxTime { 2.f };
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Ability System", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UPGAvatarComponent> AvatarComponent;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Ability System", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UPGHealthSetComponent> HealthComponent;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category="Input", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UPGNativeInputData> NativeInputData;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Input", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UPGAbilityInputData> AbilityInputData;
 
@@ -62,6 +76,10 @@ class PLANETGUARDIAN_API APGGuardian final : public APGPlayableCharacter
 public:
 	explicit APGGuardian(const FObjectInitializer& ObjectInitializer);
 
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	UPGAbilitySystemComponent* GetPGAbilitySystemComponent() const;
+	
 	/**
 	 * @brief The jetpack can be started, stopped and reset here.
 	 * This is called by the jump input when in air or reset when landed.
@@ -99,4 +117,14 @@ private:
 
 	UFUNCTION()
 	void OnLandedToggleJetpack(const FHitResult& Hit);
+
+	/**
+	* @brief Keyboard wasd Movement
+	*/
+	void Move(const FInputActionValue& Value);
+
+	/**
+	 * @brief Mouse look
+	 */
+	void Look(const FInputActionValue& Value);
 };

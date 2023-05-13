@@ -7,11 +7,6 @@
 #include "PGGameplayAbility.generated.h"
 
 
-class UPGAbilitySystemComponent;
-class APGPlayerController;
-class AController;
-class APGCharacter;
-class APGPlayableCharacter;
 
 /**
  * @brief Defines how an ability is meant to activate.

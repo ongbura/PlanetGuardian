@@ -4,7 +4,7 @@
 #include "PGAttributeSetComponent.h"
 #include "PGAbilitySystemComponent.h"
 #include "GameplayEffectExtension.h"
-#include "Character/PlayableCharacter/PGAvatarComponent.h"
+#include "PGAvatarComponent.h"
 
 
 UPGAttributeSetComponent::UPGAttributeSetComponent()

@@ -6,6 +6,19 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PGGuardianMovementComponent.generated.h"
 
+USTRUCT(BlueprintType)
+struct FPGGuardianJumpFallData
+{
+	GENERATED_BODY()
+
+	uint64 LastUpdateFrame { 0 };
+
+	UPROPERTY(BlueprintReadOnly)
+	FHitResult GroundHitResult;
+
+	UPROPERTY(BlueprintReadOnly)
+	float DistanceFromGround { 0.f };
+};
 
 UCLASS(meta=(BlueprintSpawnableComponent))
 class PLANETGUARDIAN_API UPGGuardianMovementComponent : public UCharacterMovementComponent
@@ -22,6 +35,8 @@ class PLANETGUARDIAN_API UPGGuardianMovementComponent : public UCharacterMovemen
 	bool bToggledCrouch { false };
 
 	bool bWantsToCrouchOld { false };
+
+	FPGGuardianJumpFallData JumpFallData;
 	
 public:
 	UPGGuardianMovementComponent();
@@ -35,6 +50,8 @@ public:
 	void ToggleCrouch();
 
 	bool WasToggledCrouch() const { return bToggledCrouch; }
+
+	const FPGGuardianJumpFallData& GetJumpFallData();
 
 protected:
 	virtual FNetworkPredictionData_Client* GetPredictionData_Client() const override;

@@ -7,6 +7,12 @@
 #include "UI/PGStatusBarWidget.h"
 #include "AbilitySystem/PGAbilitySystemComponent.h"
 #include "AbilitySystem/AttributeSet/PGJetpackPowerSet.h"
+#include "System/PGCheatManager.h"
+
+APGGuardianController::APGGuardianController()
+{
+	CheatClass = UPGCheatManager::StaticClass();
+}
 
 void APGGuardianController::MakeHUDVisible(UPGAbilitySystemComponent* ASC)
 {

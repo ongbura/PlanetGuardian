@@ -4,3 +4,6 @@
 "Attribute.Common.Health",""
 "Attribute.Guardian.JetpackPower",""
 Ability.Guardian.Movement.Crouch,
+State.Guardian.IsFiring,
+State.Guardian.IsOnADS,
+State.Guardian.IsReloading,

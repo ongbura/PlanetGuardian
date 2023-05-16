@@ -3,6 +3,7 @@
 
 #include "PGGuardianMovementComponent.h"
 
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
 
 
@@ -30,6 +31,55 @@ void UPGGuardianMovementComponent::ToggleCrouch()
 {
 	bWantsToCrouchOld = bWantsToCrouch;
 	bWantsToCrouch = !bWantsToCrouch;
+}
+
+const FPGGuardianJumpFallData& UPGGuardianMovementComponent::GetJumpFallData()
+{
+	if (!CharacterOwner || (GFrameCounter == JumpFallData.LastUpdateFrame))
+	{
+		return JumpFallData;
+	}
+
+	if (MovementMode == MOVE_Walking)
+	{
+		JumpFallData.GroundHitResult = CurrentFloor.HitResult;
+		JumpFallData.DistanceFromGround = 0.0f;
+	}
+	else
+	{
+		static constexpr float GroundTraceDistance = 100000.f;
+		
+		const UCapsuleComponent* CapsuleComp = CharacterOwner->GetCapsuleComponent();
+		check(CapsuleComp);
+
+		const float CapsuleHalfHeight = CapsuleComp->GetUnscaledCapsuleHalfHeight();
+		const ECollisionChannel CollisionChannel = (UpdatedComponent ? UpdatedComponent->GetCollisionObjectType() : ECC_Pawn);
+		const FVector TraceStart(GetActorLocation());
+		const FVector TraceEnd(TraceStart.X, TraceStart.Y, (TraceStart.Z - GroundTraceDistance - CapsuleHalfHeight));
+
+		FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(LyraCharacterMovementComponent_GetGroundInfo), false, CharacterOwner);
+		FCollisionResponseParams ResponseParam;
+		InitCollisionParams(QueryParams, ResponseParam);
+
+		FHitResult HitResult;
+		GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, CollisionChannel, QueryParams, ResponseParam);
+
+		JumpFallData.GroundHitResult = HitResult;
+		JumpFallData.DistanceFromGround = GroundTraceDistance;
+
+		if (MovementMode == MOVE_NavWalking)
+		{
+			JumpFallData.DistanceFromGround = 0.0f;
+		}
+		else if (HitResult.bBlockingHit)
+		{
+			JumpFallData.DistanceFromGround = FMath::Max((HitResult.Distance - CapsuleHalfHeight), 0.0f);
+		}
+	}
+
+	JumpFallData.LastUpdateFrame = GFrameCounter;
+
+	return JumpFallData;
 }
 
 FNetworkPredictionData_Client* UPGGuardianMovementComponent::GetPredictionData_Client() const

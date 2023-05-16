@@ -39,6 +39,8 @@ APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
 	
 	GuardianMovementComponent = Cast<UPGGuardianMovementComponent>(GetCharacterMovement());
 	GuardianMovementComponent->SetIsReplicated(true);
+	GuardianMovementComponent->bOrientRotationToMovement = false;
+	GuardianMovementComponent->bUseControllerDesiredRotation = false;
 
 	JetpackPowerSetComponent = CreateDefaultSubobject<UPGJetpackPowerSetComponent>(TEXT("JetpackPowerSetComponent"));
 
@@ -52,6 +54,8 @@ APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
 
 	AvatarComponent = CreateDefaultSubobject<UPGAvatarComponent>(TEXT("AvaterComponent"));
 	HealthComponent = CreateDefaultSubobject<UPGHealthSetComponent>(TEXT("HealthComponent"));
+
+	bUseControllerRotationYaw = true;
 }
 
 UAbilitySystemComponent* APGGuardian::GetAbilitySystemComponent() const

@@ -9,158 +9,154 @@
 #include "PGGuardianAnimInstance.generated.h"
 
 struct FPGGuardianAnimInstanceProxy;
-class UPGGuardianMovementComponent;
 struct FAnimNodeReference;
 struct FAnimUpdateContext;
-class UPGGuardianLocomotionData;
 
 UCLASS()
-class PLANETGUARDIAN_API UPGGuardianAnimInstance final : public UPGAnimInstance
+class PLANETGUARDIAN_API UPGGuardianAnimInstance : public UPGAnimInstance
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Settings", meta=(AllowPrivateAccess="true"))
-	FPGGuardianAnimSettings Settings;
+	friend class UPGGuardianAnimLayer;
+	friend struct FPGGuardianAnimInstanceProxy;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Location", meta=(AllowPrivateAccess="true"))
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Settings")
+	FPGGuardianAnimInstanceSettings Settings;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Location")
 	FVector WorldLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Location", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Location")
 	float DeltaDistance;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Location", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Location")
 	float GroundSpeed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Rotation", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Rotation")
 	FRotator WorldRotation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Rotation", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Rotation")
 	float DeltaYaw;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Rotation", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Rotation")
 	float DeltaYawSpeed;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Rotation", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Rotation")
 	float LeanAngle;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity")
 	FVector WorldVelocity;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity")
 	FVector LocalVelocity2D;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity")
 	float LocalVelocityDirectionAngle;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity")
 	float LocalVelocityDirectionAngleWithOffset;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity")
 	EPGCardinalDirection LocalVelocityDirection;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity")
 	EPGCardinalDirection LocalVelocityDirectionNoOffset;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Velocity")
 	bool bHasVelocity;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Acceleration", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Acceleration")
 	FVector LocalAcceleration2D;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Acceleration", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Acceleration")
 	EPGCardinalDirection LocalAccelerationDirection;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Acceleration", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Acceleration")
 	bool bHasAcceleration;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Acceleration", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Acceleration")
 	FVector PivotDirection2D;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Acceleration", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Acceleration")
 	float LastPivotTime;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement")
 	bool bIsOnGround;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement")
 	bool bIsCrouching;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement")
 	bool bCrouchStateChanged;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement")
 	bool bIsJumping;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement")
 	bool bIsFalling;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement")
 	float TimeToJumpApex;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement")
 	bool bIsRunningIntoWall;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement")
 	float DistanceFromGround;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State")
 	float TimeSinceLastFired;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State")
 	bool bIsFiring;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State")
 	bool bIsReloading;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State")
 	bool bIsOnADS;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State")
 	bool bWasOnADS;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State")
 	bool bADSStateChanged;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Play State")
 	bool bIsDashing;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="SM Data", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="SM Data")
 	EPGCardinalDirection InitialPivotDirection;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="SM Data", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="SM Data")
 	EPGCardinalDirection InitialStartDirection;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Blend Weight", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Blend Weight")
 	float UpperBodyDynamicAdditiveWeight;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Blend Weight", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Blend Weight")
 	bool bIsAnyMontagePlaying;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AimOffset", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AimOffset")
 	float AimYaw;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AimOffset", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AimOffset")
 	float AimPitch;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Turn In Place", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Turn In Place")
 	float RootYawOffset;
 
 	FFloatSpringState RootYawOffsetSpringState {};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Turn In Place", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Turn In Place")
 	float TurnYawCurveValue;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Turn In Place", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Turn In Place")
 	EPGRootYawOffsetMode RootYawOffsetMode;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Linked Layer", meta=(AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Linked Layer")
 	bool bLinkedLayerChanged;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Orientation Warping", meta=(AllowPrivateAccess="true"))
-	float OrientationWarpingBlendWeight;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Orientation Warping", meta=(AllowPrivateAccess="true"))
-	float OrientationWarpingDegree;
 
 	bool bIsFirstUpdate;	
 
@@ -169,9 +165,11 @@ public:
 
 protected:
 	virtual void LinkAnimClassLayers(TSubclassOf<UAnimInstance> InClass) override;
-	
-	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 
+	virtual void NativeInitializeAnimation() override;
+
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+	
 	virtual void NativePostEvaluateAnimation() override;
 	
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
@@ -183,55 +181,27 @@ protected:
 	bool ShouldEnableControlRig();
 
 	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))
-	void OnUpdateIdleState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
+	void UpdateIdleState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
 
 	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))
-	void OnBeginStartState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
+	void SetupStartState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
 
 	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))
-	void OnUpdateStartState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
+	void UpdateStartState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
 
 	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))
-	void OnUpdateStopState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
+	void UpdateStopState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
 
 	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))
-	void OnBeginPivotState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
+	void SetupPivotState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
 
 	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))
-	void OnUpdatePivotState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
+	void UpdatePivotState(const FAnimUpdateContext& Context, const FAnimNodeReference& Node);
 
 private:
-	void UpdateLocationData(const FPGGuardianAnimInstanceProxy& Proxy, float DeltaTime);
-
-	void UpdateRotationData(const FPGGuardianAnimInstanceProxy& Proxy, float DeltaTime);
-
-	void UpdateVelocityData(const FPGGuardianAnimInstanceProxy& Proxy);
-
-	void UpdateAccelerationData(const FPGGuardianAnimInstanceProxy& Proxy);
-
-	void UpdateWallDetectionHeuristic();
-
-	void UpdateStateData(const FPGGuardianAnimInstanceProxy& Proxy, float DeltaTime);
-
-	void UpdateBlendWeightData(float DeltaTime);
-
-	void UpdateRootYawOffset(float DeltaTime);
-
-	void UpdateAimingData(const float InPitch);
-
-	void UpdateJumpFallData(const FPGGuardianAnimInstanceProxy& Proxy);
-
-	void UpdateOrientationWarpingData(float DeltaTime);
-
 	void SetRootYawOffset(float InRootYawOffset);
-
+	
 	void ProcessTurnYaw();
-
-	static float CalculateDirection(const FVector& Velocity, const FRotator& BaseRotation);
-
-	static EPGCardinalDirection SelectDirectionFromAngle(float Angle, float DeadZone, EPGCardinalDirection CurrentDirection, bool bUseCurrentDirection);
-
-	static EPGCardinalDirection GetOppositeDirection(EPGCardinalDirection Direction);
 
 	void ShowDebug();
 	

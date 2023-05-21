@@ -9,7 +9,7 @@
  * 
  */
 USTRUCT(BlueprintType)
-struct FPGGuardianAnimSettings
+struct FPGGuardianAnimInstanceSettings
 {
 	GENERATED_BODY()
 
@@ -34,17 +34,14 @@ struct FPGGuardianAnimSettings
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Velocity Data")
 	float CardinalDirectionDeadZone { 10.f };
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Orientation Warping")
-	float OrientationWarpingSpeed { 10.f };
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Pivot Data")
+	float InitialLastPivotTime { 0.2f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Functionality")
 	bool bEnableFootPlacement { true };
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Functionality")
 	bool bEnableRootYawOffset { true };
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Curve")
-	FName DistanceCurveName { "Distance" };
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Curve")
 	FName TurnYawWeightCurveName { "TurnYawWeight" };

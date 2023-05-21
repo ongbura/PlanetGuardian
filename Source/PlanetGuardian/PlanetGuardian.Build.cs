@@ -28,7 +28,9 @@ public class PlanetGuardian : ModuleRules
             "GameplayTasks",
             "DeveloperSettings",
             "UMG",
-            "AnimGraphRuntime",
+            "AnimGraphRuntime", 
+            "AnimationLocomotionLibraryRuntime",
+            "IKRig",
         });
 
         PrivateIncludePaths.Add("PlanetGuardian");

@@ -4,15 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstanceProxy.h"
+#include "Animation/PGAnimInstance.h"
 #include "PGGuardianAnimInstanceProxy.generated.h"
 
+class UPGGuardianMovementComponent;
+class APGGuardian;
 class UPGGuardianAnimInstance;
 
 USTRUCT()
 struct FPGGuardianAnimInstanceProxy : public FAnimInstanceProxy
 {
 	GENERATED_BODY()
-
+	
 	FVector WorldLocation { 0.f };
 
 	FRotator WorldRotation { 0.f };
@@ -43,12 +46,53 @@ struct FPGGuardianAnimInstanceProxy : public FAnimInstanceProxy
 
 	bool bIsDashing { false };
 
-	bool bShouldUpdate { true };
+	bool bIsFirstUpdate { true };
+
+	bool bShouldUpdate { false };
 	
+private:
+	TWeakObjectPtr<UPGGuardianAnimInstance> OwnerInstance;
+	TWeakObjectPtr<APGGuardian> Guardian;
+	TWeakObjectPtr<UPGGuardianMovementComponent> CMC;
+
+public:
 	FPGGuardianAnimInstanceProxy() = default;
 
 	explicit FPGGuardianAnimInstanceProxy(UAnimInstance* InAnimInstance);
 
 protected:
+	virtual void Initialize(UAnimInstance* InAnimInstance) override;
+
+	virtual void Uninitialize(UAnimInstance* InAnimInstance) override;
+	
 	virtual void PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds) override;
+
+	virtual void Update(float DeltaSeconds) override;
+
+private:
+	void UpdateLocationData(float DeltaTime);
+
+	void UpdateRotationData(float DeltaTime);
+
+	void UpdateVelocityData();
+
+	void UpdateAccelerationData();
+
+	void UpdateWallDetectionHeuristic();
+
+	void UpdateStateData(float DeltaTime);
+
+	void UpdateBlendWeightData(float DeltaTime);
+
+	void UpdateRootYawOffset(float DeltaTime);
+
+	void UpdateAimingData(const float InPitch);
+
+	void UpdateJumpFallData();
+
+	static float CalculateDirection(const FVector& Velocity, const FRotator& BaseRotation);
+
+	static EPGCardinalDirection SelectDirectionFromAngle(float Angle, float DeadZone, EPGCardinalDirection CurrentDirection, bool bUseCurrentDirection);
+
+	static EPGCardinalDirection GetOppositeDirection(EPGCardinalDirection Direction);
 };

@@ -41,11 +41,14 @@ class PLANETGUARDIAN_API UPGGuardianMovementComponent : public UCharacterMovemen
 public:
 	UPGGuardianMovementComponent();
 
-	void SprintPressed();
+	void Sprint();
 
 	bool CanSprint() const;
 
-	void SprintReleased();
+	UFUNCTION(BlueprintPure)
+	bool IsSprinting() const;
+
+	void StopSprinting();
 
 	void ToggleCrouch();
 
@@ -54,6 +57,8 @@ public:
 	const FPGGuardianJumpFallData& GetJumpFallData();
 
 protected:
+	virtual void PerformMovement(float DeltaTime) override;
+	
 	virtual FNetworkPredictionData_Client* GetPredictionData_Client() const override;
 
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;

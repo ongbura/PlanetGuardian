@@ -18,6 +18,8 @@ class PLANETGUARDIAN_API UPGGameplayAbility_Sprint : public UPGGameplayAbility
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	TSubclassOf<UGameplayEffect> SprintEffectClass;
 
+	bool bShouldTerminateCommittingLoop { false };
+
 public:
 	UPGGameplayAbility_Sprint();
 
@@ -30,15 +32,20 @@ protected:
 	                                const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
 	                                FGameplayTagContainer* OptionalRelevantTags) const override;
 
-	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-	                           const FGameplayAbilityActivationInfo ActivationInfo) override;
 
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	                        const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility,
 	                        bool bWasCancelled) override;
 
 private:
-	void Sprint();
+	UFUNCTION()
+	void OnSprintReleased(float TimeHeld);
 
-	void StopSprinting();
+	void CommitSprintAbilityLoop();
+
+	UFUNCTION()
+	void OnWaitingFinishedForCommitSprint();
+
+	UFUNCTION()
+	void OnServerSyncedForCommitSprint();
 };

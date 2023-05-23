@@ -24,6 +24,17 @@ FString UPGAnimNotify_EffectsEmitter::GetNotifyName_Implementation() const
 void UPGAnimNotify_EffectsEmitter::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                           const FAnimNotifyEventReference& EventReference)
 {
+	if (MeshComp->GetOwnerRole() == ROLE_Authority)
+	{
+		return;
+	}
+	
+	if (bSkipVisualFX && bSkipSoundFX)
+	{
+		Super::Notify(MeshComp, Animation, EventReference);
+		return;
+	}
+	
 	const auto* World = MeshComp->GetWorld();
 	if (World == nullptr)
 	{
@@ -62,12 +73,6 @@ void UPGAnimNotify_EffectsEmitter::Notify(USkeletalMeshComponent* MeshComp, UAni
 		
 		return;
 	}
-	
-	const auto* PoolSubsystem = World->GetSubsystem<UPGEffectEmitterPoolSubsystem>();
-	if (PoolSubsystem == nullptr || PoolSubsystem->GetEffectEmitterPool() == nullptr)
-	{		
-		return;
-	}
 
 	const auto BundlePath = AssetManager.GetPrimaryAssetPath(EffectBundle);
 	if (!BundlePath.IsValid())
@@ -82,33 +87,32 @@ void UPGAnimNotify_EffectsEmitter::Notify(USkeletalMeshComponent* MeshComp, UAni
 		check(Bundle);
 	}
 
-	auto* EffectSubsystem = UPGEffectSubsystem::Get();
+	if (!Bundle->GetSoftVisualFXPath().IsValid() && !Bundle->GetSoftSoundFXPath().IsValid())
+	{
+		return;
+	}
+	
+	const auto* PoolSubsystem = World->GetSubsystem<UPGEffectEmitterPoolSubsystem>();
+	if (PoolSubsystem == nullptr || PoolSubsystem->GetEffectEmitterPool() == nullptr)
+	{		
+		return;
+	}
+
+	auto* EffectSubsystem = World->GetSubsystem<UPGEffectSubsystem>();
 	if (EffectSubsystem == nullptr)
 	{
 		return;
 	}
 
-	auto* VisualFX = EffectSubsystem->GetVisualFX(Bundle->GetSoftVisualFXPath());
-	auto* SoundFX = EffectSubsystem->GetSoundFX(Bundle->GetSoftSoundFXPath());
+	auto* VisualFX = bSkipVisualFX ? nullptr : EffectSubsystem->GetVisualFX(Bundle->GetSoftVisualFXPath());
+	auto* SoundFX = bSkipSoundFX ? nullptr : EffectSubsystem->GetSoundFX(Bundle->GetSoftSoundFXPath());
 
-	if (VisualFX == nullptr && SoundFX == nullptr)
-	{
-		return;
-	}
-	
 	auto* Emitter = PoolSubsystem->GetEffectEmitterPool()->PopEffectEmitter();
 	check(Emitter);
-
-	if (VisualFX)
-	{
-		Emitter->SetVisualEffectSettings(VisualFX, VFXSettings);
-	}
-
-	if (SoundFX)
-	{
-		Emitter->SetSoundEffectSettings(SoundFX, SFXSettings);
-	}
 	
+	Emitter->SetVisualEffectAndSettings(VisualFX, VFXSettings);
+	Emitter->SetSoundEffectAndSettings(SoundFX, SFXSettings);
+
 	if (bShouldAttached)
 	{
 		Emitter->Activate(MeshComp, SocketName);

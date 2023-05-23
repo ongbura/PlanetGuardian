@@ -78,9 +78,9 @@ void FPGGuardianAnimInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, floa
 
 	if (const auto* AbilitySystem = Guardian->GetPGAbilitySystemComponent())
 	{
-		bIsOnADS = AbilitySystem->HasMatchingGameplayTag(GNativeTags.State_Guardian_IsOnADS);
-		bIsFiring = AbilitySystem->HasMatchingGameplayTag(GNativeTags.State_Guardian_IsFiring);
-		bIsReloading = AbilitySystem->HasMatchingGameplayTag(GNativeTags.State_Guardian_IsReloading);
+		bIsOnADS = AbilitySystem->HasMatchingGameplayTag(PGGameplayTags::State_Guardian_IsOnADS);
+		bIsFiring = AbilitySystem->HasMatchingGameplayTag(PGGameplayTags::State_Guardian_IsFiring);
+		bIsReloading = AbilitySystem->HasMatchingGameplayTag(PGGameplayTags::State_Guardian_IsReloading);
 	}
 	else
 	{
@@ -215,9 +215,8 @@ void FPGGuardianAnimInstanceProxy::UpdateStateData(float DeltaTime)
 	OwnerInstance->bIsOnGround = bIsOnGround;
 
 	// Crouch state
-	const bool bWasCrouchingLastUpdate = OwnerInstance->bIsCrouching;
+	OwnerInstance->bCrouchStateChanged = OwnerInstance->bIsCrouching != bIsCrouching;
 	OwnerInstance->bIsCrouching = bIsCrouching;
-	OwnerInstance->bCrouchStateChanged = bWasCrouchingLastUpdate != bIsCrouching;
 
 	OwnerInstance->bIsOnADS = bIsOnADS;
 	OwnerInstance->bIsFiring = bIsFiring;

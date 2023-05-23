@@ -7,16 +7,20 @@
 #include "UI/PGStatusBarWidget.h"
 #include "AbilitySystem/PGAbilitySystemComponent.h"
 #include "AbilitySystem/AttributeSet/PGJetpackPowerSet.h"
+#include "Camera/PGGuardianCameraManager.h"
+#include "Character/Guardian/PGGuardian.h"
 #include "System/PGCheatManager.h"
+#include "UI/PGGuardianHealthBarWidget.h"
+#include "UI/PGJetpackPowerBarWidget.h"
 
 APGGuardianController::APGGuardianController()
 {
 	CheatClass = UPGCheatManager::StaticClass();
 }
 
-void APGGuardianController::MakeHUDVisible(UPGAbilitySystemComponent* ASC)
+void APGGuardianController::MakeHUDVisible(const UPGAbilitySystemComponent* ASC)
 {
-	if (HasAuthority() || ASC == nullptr)
+	if (ASC == nullptr || HUDClass == nullptr)
 	{
 		return;
 	}
@@ -31,22 +35,12 @@ void APGGuardianController::MakeHUDVisible(UPGAbilitySystemComponent* ASC)
 	auto* HealthBar = HUD->GetHealthBar();
 	check(HealthBar);
 
-	auto&& HealthAttribute = UPGHealthSet::GetHealthAttribute();
-	auto&& MaxHealthAttribute = UPGHealthSet::GetMaxHealthAttribute();
-
-	HealthBar->InitializeStatusValue(ASC->GetNumericAttributeBase(HealthAttribute), ASC->GetNumericAttributeBase(MaxHealthAttribute));
-	HealthBar->BindAttributeChanged(ASC->GetGameplayAttributeValueChangeDelegate(MoveTemp(HealthAttribute)));
-	HealthBar->BindAttributeChanged(ASC->GetGameplayAttributeValueChangeDelegate(MoveTemp(MaxHealthAttribute)));
+	HealthBar->InitializeWithHealthSet(ASC->GetSet<UPGHealthSet>());
 
 	auto* JetpackPowerBar = HUD->GetJetpackPowerBar();
 	check(JetpackPowerBar);
 
-	auto&& JetpackPowerAttribute = UPGJetpackPowerSet::GetJetpackPowerAttribute();
-	auto&& MaxJetpackPowerAttribute = UPGJetpackPowerSet::GetMaxJetpackPowerAttribute();
-
-	JetpackPowerBar->InitializeStatusValue(ASC->GetNumericAttributeBase(JetpackPowerAttribute), ASC->GetNumericAttributeBase(MaxJetpackPowerAttribute));
-	JetpackPowerBar->BindAttributeChanged(ASC->GetGameplayAttributeValueChangeDelegate(MoveTemp(JetpackPowerAttribute)));
-	JetpackPowerBar->BindAttributeChanged(ASC->GetGameplayAttributeValueChangeDelegate(MoveTemp(MaxJetpackPowerAttribute)));
+	JetpackPowerBar->InitializeWithJetpackPowerSet(ASC->GetSet<UPGJetpackPowerSet>());
 }
 
 void APGGuardianController::MakeHUDInvisible() const
@@ -54,6 +48,20 @@ void APGGuardianController::MakeHUDInvisible() const
 	if (HUD)
 	{
 		HUD->RemoveFromParent();
+	}
+}
+
+void APGGuardianController::AcknowledgePossession(APawn* P)
+{
+	Super::AcknowledgePossession(P);
+
+	if (IsLocalController())
+	{
+		const auto* Guardian = Cast<APGGuardian>(P);
+		auto* PCM = Cast<APGGuardianCameraManager>(PlayerCameraManager);
+		check(PCM);
+
+		PCM->InitializeObjects(Guardian);
 	}
 }
 

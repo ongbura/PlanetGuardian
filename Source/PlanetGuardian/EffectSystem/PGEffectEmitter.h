@@ -57,9 +57,9 @@ public:
 
 	void Activate(USkeletalMeshComponent* TargetMesh, const FName& SocketName);
 
-	void SetVisualEffectSettings(UNiagaraSystem* Asset, const FPGEffectSettings_VFX& VisualFXSettings);
+	void SetVisualEffectAndSettings(UNiagaraSystem* Asset, const FPGEffectSettings_VFX& VisualFXSettings);
 
-	void SetSoundEffectSettings(USoundBase* Asset, const FPGEffectSettings_SFX& SoundFXSettings);
+	void SetSoundEffectAndSettings(USoundBase* Asset, const FPGEffectSettings_SFX& SoundFXSettings);
 	
 protected:
 	virtual void BeginPlay() override;

@@ -5,6 +5,12 @@
 #include "Character/Guardian/PGGuardian.h"
 #include "Character/Guardian/PGGuardianMovementComponent.h"
 
+UPGGameplayAbility_Crouch::UPGGameplayAbility_Crouch()
+{
+	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::NonInstanced;
+}
+
 void UPGGameplayAbility_Crouch::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                                 const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                                 const FGameplayEventData* TriggerEventData)
@@ -22,18 +28,8 @@ void UPGGameplayAbility_Crouch::ActivateAbility(const FGameplayAbilitySpecHandle
 		check(CMC);
 
 		CMC->ToggleCrouch();
-		
-		// auto* Avatar = Cast<APGGuardian>(ActorInfo->AvatarActor.Get());
-		// check(Avatar);
-		//
-		// if (Avatar->bIsCrouched)
-		// {
-		// 	Avatar->UnCrouch(true);
-		// }
-		// else
-		// {
-		// 	Avatar->Crouch(true);
-		// }
+
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 	}
 }
 
@@ -60,20 +56,4 @@ bool UPGGameplayAbility_Crouch::CanActivateAbility(const FGameplayAbilitySpecHan
 	}
 
 	return true;
-}
-
-void UPGGameplayAbility_Crouch::InputReleased(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
-{
-	Super::InputReleased(Handle, ActorInfo, ActivationInfo);
-
-	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-
-}
-
-void UPGGameplayAbility_Crouch::EndAbility(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
-	bool bReplicateEndAbility, bool bWasCancelled)
-{
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

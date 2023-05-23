@@ -10,8 +10,6 @@ struct FOnAttributeChangeData;
 class UPGAttributeSet;
 class UPGAbilitySystemComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FPGOnAttributeChanged, UPGAbilitySystemComponent*, Owner, AActor*, Instigator, float, NewValue, float, OldValue);
-
 UCLASS(meta=(BlueprintSpawnableComponent))
 class PLANETGUARDIAN_API UPGAttributeSetComponent : public UActorComponent
 {
@@ -37,11 +35,11 @@ protected:
 	static AActor* GetInstigatorFromAttrChangeDate(const FOnAttributeChangeData& ChangeData);
 
 	template <typename T>
-	T* GetAttributeSet() const;	
+	const T* GetAttributeSet() const;
 };
 
 template <typename T>
-T* UPGAttributeSetComponent::GetAttributeSet() const
+const T* UPGAttributeSetComponent::GetAttributeSet() const
 {
 	if (AttributeSet.IsValid())
 	{

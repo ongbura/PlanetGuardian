@@ -23,11 +23,14 @@ class PLANETGUARDIAN_API APGGuardianController : public APGPlayerController
 public:
 	APGGuardianController();
 	
-	void MakeHUDVisible(UPGAbilitySystemComponent* ASC);
+	void MakeHUDVisible(const UPGAbilitySystemComponent* ASC);
 
 	void MakeHUDInvisible() const;
 
 	UPGHUD* GetPGHUD() const { return HUD; }
+
+protected:
+	virtual void AcknowledgePossession(APawn* P) override;
 
 private:
 	void CreateHUD();

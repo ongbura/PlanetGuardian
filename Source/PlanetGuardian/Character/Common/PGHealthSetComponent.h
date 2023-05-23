@@ -6,6 +6,8 @@
 #include "AbilitySystem/PGAttributeSetComponent.h"
 #include "PGHealthSetComponent.generated.h"
 
+class UPGHealthSet;
+
 UENUM(BlueprintType)
 enum class EPGDeathState : uint8
 {
@@ -19,11 +21,6 @@ class PLANETGUARDIAN_API UPGHealthSetComponent : public UPGAttributeSetComponent
 {
 	GENERATED_BODY()
 
-public:
-	FPGOnAttributeChanged OnHealthChanged;
-	FPGOnAttributeChanged OnMaxHealthChanged;
-
-private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true", UIMin="0", UIMax="100", ForceUnits="Percent"))
 	float InitialHealthPercent { 100.f };
 
@@ -36,12 +33,14 @@ private:
 public:
 	UPGHealthSetComponent();
 
+	const UPGHealthSet* GetHealthSet() const;
+
 	float GetHealth() const;
 
 	float GetMaxHealth() const;
 
-	float GetHealthNormalized() const;
-	
+	float GetHealthRegenRate() const;
+
 protected:
 	virtual void InitializeWithAbilitySystem(UPGAbilitySystemComponent* InASC) override;
 
@@ -50,10 +49,6 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	void HandleHealthChanged(const FOnAttributeChangeData& ChangeData);
-	
-	void HandleMaxHealthChanged(const FOnAttributeChangeData& ChangeData);
-
 	// Begins the death sequence for the owner.
 	void StartDeath();
 

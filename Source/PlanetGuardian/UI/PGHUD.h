@@ -6,23 +6,22 @@
 #include "Blueprint/UserWidget.h"
 #include "PGHUD.generated.h"
 
-class UPGStatusBarWidget;
-/**
- * 
- */
+class UPGGuardianHealthBarWidget;
+class UPGJetpackPowerBarWidget;
+
 UCLASS()
 class PLANETGUARDIAN_API UPGHUD : public UUserWidget
 {
 	GENERATED_BODY()
 
 	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UPGStatusBarWidget> HealthBar;
+	TObjectPtr<UPGGuardianHealthBarWidget> HealthBar;
 
 	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UPGStatusBarWidget> JetpackPowerBar;
+	TObjectPtr<UPGJetpackPowerBarWidget> JetpackPowerBar;
 
 public:
-	UPGStatusBarWidget* GetHealthBar() const { return HealthBar; }
+	UPGGuardianHealthBarWidget* GetHealthBar() const { return HealthBar; }
 
-	UPGStatusBarWidget* GetJetpackPowerBar() const { return JetpackPowerBar; }
+	UPGJetpackPowerBarWidget* GetJetpackPowerBar() const { return JetpackPowerBar; }
 };

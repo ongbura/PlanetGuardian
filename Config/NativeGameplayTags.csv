@@ -1,9 +1,17 @@
 "TagName","TagDevComment"
+"Ability.ActivateFail.ActivationGroup",Ability failed to activate because of its activation group.
+"Ability.ActivateFail.Cooldown",Ability failed to activate because it is on cool down.
+"Ability.ActivateFail.Cost",Ability failed to activate because it did not pass the cost checks.
+"Ability.ActivateFail.IsDead",Ability failed to activate because its owner is dead.
+"Ability.ActivateFail.Networking",Ability failed to activate because it did not pass the network checks.
+"Ability.ActivateFail.TagsBlocked",Ability failed to activate because tags are blocking it.
+"Ability.ActivateFail.TagsMissing",Ability failed to activate because tags are missing.
+"Ability.Guardian.Movement.Crouch",
+"Ability.Guardian.Movement.Jetpack",
 "Ability.Guardian.Movement.Jump",""
 "Ability.Guardian.Movement.Sprint",""
 "Attribute.Common.Health",""
 "Attribute.Guardian.JetpackPower",""
-Ability.Guardian.Movement.Crouch,
-State.Guardian.IsFiring,
-State.Guardian.IsOnADS,
-State.Guardian.IsReloading,
+"State.Guardian.IsFiring",""
+"State.Guardian.IsOnADS",""
+"State.Guardian.IsReloading",""

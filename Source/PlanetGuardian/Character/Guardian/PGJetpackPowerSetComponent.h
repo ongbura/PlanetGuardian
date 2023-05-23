@@ -7,28 +7,26 @@
 #include "PGJetpackPowerSetComponent.generated.h"
 
 
+class UPGJetpackPowerSet;
+
 UCLASS(meta=(BlueprintSpawnableComponent))
 class PLANETGUARDIAN_API UPGJetpackPowerSetComponent : public UPGAttributeSetComponent
 {
 	GENERATED_BODY()
 
-public:
-	FPGOnAttributeChanged OnJetpackPowerChanged;
-	FPGOnAttributeChanged OnMaxJetpackPowerChanged;
-	FPGOnAttributeChanged OnJetpackPowerRegenRateChanged;
-
-private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true", UIMin="0", UIMax="100", ForceUnits="Percent"))
-	float InitialJetpackPowerPercent { 70.f };
+	float InitialJetpackPowerPercent { 100.f };
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
-	float DefaultMaxJetpackPower { 20.f };
+	float DefaultMaxJetpackPower { 50.f };
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	float DefaultJetpackPowerRegenRate { 0.5f };
 
 public:
 	UPGJetpackPowerSetComponent();
+
+	const UPGJetpackPowerSet* GetJetpackPowerSet() const;
 
 	float GetJetpackPower() const;
 
@@ -40,14 +38,4 @@ protected:
 	virtual void InitializeWithAbilitySystem(UPGAbilitySystemComponent* InASC) override;
 
 	virtual void UninitializeFromAbilitySystem() override;
-
-private:
-	void HandleJetpackPowerChanged(const FOnAttributeChangeData& ChangeData);
-
-	void HandleMaxJetpackPowerChanged(const FOnAttributeChangeData& ChangeData);
-
-	void HandleJetpackPowerRegenRateChanged(const FOnAttributeChangeData& ChangeData);
-
-	
-
 };

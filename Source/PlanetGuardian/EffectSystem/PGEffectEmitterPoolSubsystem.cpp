@@ -27,5 +27,8 @@ void UPGEffectEmitterPoolSubsystem::Initialize(FSubsystemCollectionBase& Collect
 
 bool UPGEffectEmitterPoolSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
-	return IsRunningDedicatedServer() ? false : true;
+	const auto* World = Cast<UWorld>(Outer);
+	check(World);
+	
+	return World->GetAuthGameMode() == nullptr;
 }

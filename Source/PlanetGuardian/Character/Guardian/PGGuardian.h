@@ -39,7 +39,7 @@ class PLANETGUARDIAN_API APGGuardian final : public APGCharacter, public IAbilit
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Jetpack", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UPGJetpackPowerSetComponent> JetpackPowerSetComponent;
-
+	
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Jetpack", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<USkeletalMeshComponent> Jetpack;
 
@@ -86,6 +86,10 @@ public:
 	 * The jetpack and its functionality could become an own component if you would have several characters able to use it.
 	 */
 	void ToggleJetpack(bool bReset, bool bActivate);
+
+	UPGSpringArmComponent* GetCameraBoom() const { return CameraBoom.Get(); }
+
+	UCameraComponent* GetFollowCamera() const { return FollowCamera.Get(); }
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;

@@ -79,6 +79,7 @@ DerivedDataCache/*
 Platforms/*
 
 Package/*
+Packaged/*
 
 RunClient.bat
 RunServer.bat

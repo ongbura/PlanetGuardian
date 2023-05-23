@@ -2,27 +2,36 @@
 
 
 #include "PGGuardianMovementComponent.h"
-
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
-
 
 UPGGuardianMovementComponent::UPGGuardianMovementComponent()
 {
 	NavAgentProps.bCanCrouch = true;
 }
 
-void UPGGuardianMovementComponent::SprintPressed()
+void UPGGuardianMovementComponent::Sprint()
 {
 	bWantsToSprint = true;
 }
 
 bool UPGGuardianMovementComponent::CanSprint() const
 {
-	return (MovementMode == MOVE_Walking || MovementMode == MOVE_NavWalking) && !IsCrouching() && !IsFalling();
+	const FRotator WorldRotation = CharacterOwner->GetActorRotation();
+	const FVector LocalAcceleration = WorldRotation.UnrotateVector(GetCurrentAcceleration());
+
+	const bool bAcceleratingForward = FMath::IsNearlyEqual(LocalAcceleration.X, MaxAcceleration, 100.f);
+	const bool bReadyForSprint = (MovementMode == MOVE_Walking || MovementMode == MOVE_NavWalking) && !IsCrouching() && !IsFalling();
+	
+	return bAcceleratingForward && bReadyForSprint;
 }
 
-void UPGGuardianMovementComponent::SprintReleased()
+bool UPGGuardianMovementComponent::IsSprinting() const
+{
+	return bWantsToSprint;
+}
+
+void UPGGuardianMovementComponent::StopSprinting()
 {
 	bWantsToSprint = false;
 }
@@ -80,6 +89,11 @@ const FPGGuardianJumpFallData& UPGGuardianMovementComponent::GetJumpFallData()
 	JumpFallData.LastUpdateFrame = GFrameCounter;
 
 	return JumpFallData;
+}
+
+void UPGGuardianMovementComponent::PerformMovement(float DeltaTime)
+{
+	Super::PerformMovement(DeltaTime);
 }
 
 FNetworkPredictionData_Client* UPGGuardianMovementComponent::GetPredictionData_Client() const

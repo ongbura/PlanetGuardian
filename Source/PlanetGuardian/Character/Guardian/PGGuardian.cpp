@@ -43,7 +43,7 @@ APGGuardian::APGGuardian(const FObjectInitializer& ObjectInitializer)
 	GuardianMovementComponent->bUseControllerDesiredRotation = false;
 
 	JetpackPowerSetComponent = CreateDefaultSubobject<UPGJetpackPowerSetComponent>(TEXT("JetpackPowerSetComponent"));
-
+	
 	Jetpack->SetupAttachment(GetMesh(), TEXT("BackpackSocket"));
 
 	JetpackEffect->SetupAttachment(Jetpack, TEXT("ThrusterSocketLeft"));
@@ -159,6 +159,11 @@ void APGGuardian::PossessedBy(AController* NewController)
 		if (GetNetMode() != NM_DedicatedServer && IsLocallyControlled())
 		{
 			AvatarComponent->HandlePlayerControllerAssigned();
+
+			if (auto* PC = Cast<APGGuardianController>(NewController))
+			{
+				PC->MakeHUDVisible(GetPGAbilitySystemComponent());
+			}
 		}
 		
 		auto* AbilitySystem = GetPGAbilitySystemComponent();
@@ -313,7 +318,12 @@ void APGGuardian::Move(const FInputActionValue& Value)
 
 	const FRotator CameraWorldRotation(0.f, GetControlRotation().Yaw, 0.f);
 	const FVector ForwardBasedXInput(FRotationMatrix(CameraWorldRotation).GetScaledAxis(EAxis::X) * MoveInput.X);
-	const FVector RightBasedYInput(FRotationMatrix(CameraWorldRotation).GetScaledAxis(EAxis::Y) * MoveInput.Y);
+	FVector RightBasedYInput(FRotationMatrix(CameraWorldRotation).GetScaledAxis(EAxis::Y) * MoveInput.Y);
+
+	if (GuardianMovementComponent->IsSprinting())
+	{
+		RightBasedYInput = FVector::ZeroVector;
+	}
 
 	FVector DirectionToMove(ForwardBasedXInput + RightBasedYInput);
 	DirectionToMove.Normalize();

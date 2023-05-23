@@ -4,7 +4,6 @@
 #include "PGGuardianAnimInstance.h"
 #include "PGGuardianAnimInstanceProxy.h"
 #include "Character/Guardian/PGGuardian.h"
-#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "System/PGGameGlobals.h"
 #include "ThirdParty/MagicEnum/PGMagicEnum.h"
@@ -208,26 +207,28 @@ void UPGGuardianAnimInstance::ShowDebug()
 	Globals.PrintMessage(FColor::White, TEXT("LocalVelocityDirectionAngleWithOffset: %f"), LocalVelocityDirectionAngleWithOffset);
 	Globals.PrintMessage(FColor::White, TEXT("LocalVelocityDirection: %s"), *FPGMagicEnum::GetEnumString(LocalVelocityDirection));
 
-	const auto* Guardian = Cast<APGGuardian>(TryGetPawnOwner());
-	if (Guardian == nullptr)
+	if (GroundSpeed > 10.f)
 	{
-		return;
+		const auto* Guardian = Cast<APGGuardian>(TryGetPawnOwner());
+		if (Guardian == nullptr)
+		{
+			return;
+		}
+
+		const auto* Mesh = Cast<USkeletalMeshComponent>(GetOwningComponent());
+		if (Mesh == nullptr)
+		{
+			return;
+		}
+	
+		const auto* CMC = Guardian->GetCharacterMovement();
+
+		const FVector Start = Mesh->GetComponentLocation();
+		const FVector End = Start + WorldVelocity.GetSafeNormal() * FVector{ 100.f };
+
+		const FVector VelocityStart = Start + FVector(0.f, 0.f, 1.f);
+		const FVector VelocityEnd = FMath::Lerp(Start, End, GroundSpeed / CMC->MaxWalkSpeed);
+	
+		DrawDebugDirectionalArrow(GetWorld(), VelocityStart, VelocityEnd, 100.f, FColor::Yellow, false, -1.f, SDPG_World, 10.f);
 	}
-
-	const auto* Mesh = Cast<USkeletalMeshComponent>(GetOwningComponent());
-	if (Mesh == nullptr)
-	{
-		return;
-	}
-	
-	const auto* CMC = Guardian->GetCharacterMovement();
-
-	const FVector Start = Mesh->GetComponentLocation();
-	const FVector End = Start + WorldVelocity.GetSafeNormal() * FVector{ 100.f };
-
-	const FVector VelocityStart = Start + FVector(0.f, 0.f, 1.f);
-	const FVector VelocityEnd = FMath::Lerp(Start, End, GroundSpeed / CMC->MaxWalkSpeed);
-	
-	DrawDebugDirectionalArrow(GetWorld(), VelocityStart, VelocityEnd, 100.f, FColor::Yellow, false, -1.f, SDPG_World, 10.f);
-	
 }

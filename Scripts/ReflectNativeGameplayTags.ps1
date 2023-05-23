@@ -28,13 +28,8 @@ foreach ($row in $sortedData) {
         $previousHierarchy = $currentHierarchy
     }
 
-    $nativeGameplayTagsHMembers += "FGameplayTag $memberName{};"
-    
-    if ($tagDevComment) {
-        $nativeGameplayTagsCPPAddTags += "$memberName = GameplayTagsManager.AddNativeGameplayTag(`"$tagName`", `"$tagDevComment`");"
-    } else {
-        $nativeGameplayTagsCPPAddTags += "$memberName = GameplayTagsManager.AddNativeGameplayTag(`"$tagName`");"
-    }
+    $nativeGameplayTagsHMembers += "PLANETGUARDIAN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN($memberName);"
+    $nativeGameplayTagsCPPAddTags += "UE_DEFINE_GAMEPLAY_TAG_COMMENT($memberName, `"$tagName`", `"$tagDevComment`");"
 }
 
 $nativeGameplayTagsHContent = @"
@@ -42,30 +37,22 @@ $nativeGameplayTagsHContent = @"
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
+#include "NativeGameplayTags.h"
 
-static struct FPGNativeGameplayTags : FGameplayTagNativeAdder
+namespace PGGameplayTags
 {
     $($nativeGameplayTagsHMembers -join "`r`n`t")
-
-    virtual void AddTags() override;
-} GNativeTags;
+}
 "@
 
 $nativeGameplayTagsCPPContent = @"
 // Copyright (c) 2023 Ongbular (Park Joo-Hyeong). All rights reserved.
 
 #include "PGNativeGameplayTags.h"
-#include "NativeGameplayTags.h"
 
-void FPGNativeGameplayTags::AddTags()
+namespace PGGameplayTags
 {
-    auto& GameplayTagsManager = UGameplayTagsManager::Get();
-
     $($nativeGameplayTagsCPPAddTags -join "`r`n`t")
-
-    GameplayTagsManager.OnLastChanceToAddNativeTags().RemoveAll(this);
 }
 "@
 

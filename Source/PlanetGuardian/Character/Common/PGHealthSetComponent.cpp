@@ -13,49 +13,41 @@ UPGHealthSetComponent::UPGHealthSetComponent()
 	SetIsReplicatedByDefault(true);
 }
 
+const UPGHealthSet* UPGHealthSetComponent::GetHealthSet() const
+{
+	return GetAttributeSet<UPGHealthSet>();
+}
+
 float UPGHealthSetComponent::GetHealth() const
 {
-	check(AttributeSet.IsValid());
-	
-	const auto* HealthSet = Cast<UPGHealthSet>(AttributeSet.Get());
-	check(HealthSet);
-
+	const auto* HealthSet = GetHealthSet();
 	return HealthSet->GetHealth();
 }
 
 float UPGHealthSetComponent::GetMaxHealth() const
 {
-	check(AttributeSet.IsValid());
-
-	const auto* HealthSet = Cast<UPGHealthSet>(AttributeSet.Get());
-	check(HealthSet);
-
+	const auto* HealthSet = GetHealthSet();
 	return HealthSet->GetMaxHealth();
 }
 
-float UPGHealthSetComponent::GetHealthNormalized() const
+float UPGHealthSetComponent::GetHealthRegenRate() const
 {
-	const float Health = GetHealth();
-	const float MaxHealth = GetMaxHealth();
-
-	return MaxHealth > 0.f ? Health / MaxHealth : 0.f;
+	const auto* HealthSet = GetHealthSet();
+	return HealthSet->GetHealthRegenRate();
 }
 
 void UPGHealthSetComponent::InitializeWithAbilitySystem(UPGAbilitySystemComponent* InASC)
 {
 	Super::InitializeWithAbilitySystem(InASC);
 
-	AttributeSet = InASC->GetSet<UPGHealthSet>();
-	check(AttributeSet.IsValid());
-
-	InASC->GetGameplayAttributeValueChangeDelegate(UPGHealthSet::GetHealthAttribute()).AddUObject(this, &UPGHealthSetComponent::HandleHealthChanged);
-	InASC->GetGameplayAttributeValueChangeDelegate(UPGHealthSet::GetMaxHealthAttribute()).AddUObject(this, &UPGHealthSetComponent::HandleMaxHealthChanged);
-
-	auto* HealthSet = Cast<UPGHealthSet>(AttributeSet.Get());
+	auto* HealthSet = InASC->GetSet<UPGHealthSet>();
 	check(HealthSet);
 
 	InASC->SetNumericAttributeBase(HealthSet->GetMaxHealthAttribute(), DefaultMaxHealth);
 	InASC->SetNumericAttributeBase(HealthSet->GetHealthAttribute(), DefaultMaxHealth * InitialHealthPercent / 100.f);
+
+	AttributeSet = HealthSet;
+	check(AttributeSet.IsValid());
 }
 
 void UPGHealthSetComponent::UninitializeFromAbilitySystem()
@@ -68,26 +60,6 @@ void UPGHealthSetComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UPGHealthSetComponent, DeathState);
-}
-
-void UPGHealthSetComponent::HandleHealthChanged(const FOnAttributeChangeData& ChangeData)
-{
-	check(AbilitySystemComponent.IsValid());
-	
-	if (OnHealthChanged.IsBound())
-	{
-		OnHealthChanged.Broadcast(AbilitySystemComponent.Get(), GetInstigatorFromAttrChangeDate(ChangeData), ChangeData.NewValue, ChangeData.OldValue);
-	}
-}
-
-void UPGHealthSetComponent::HandleMaxHealthChanged(const FOnAttributeChangeData& ChangeData)
-{
-	check(AbilitySystemComponent.IsValid());
-	
-	if (OnMaxHealthChanged.IsBound())
-	{
-		OnMaxHealthChanged.Broadcast(AbilitySystemComponent.Get(), GetInstigatorFromAttrChangeDate(ChangeData), ChangeData.NewValue, ChangeData.OldValue);
-	}
 }
 
 void UPGHealthSetComponent::StartDeath()

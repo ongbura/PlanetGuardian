@@ -7,35 +7,41 @@
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "PGAnimNotify_EffectsEmitter.generated.h"
 
-UCLASS(Abstract, HideCategories=Object, CollapseCategories)
+UCLASS(Abstract)
 class PLANETGUARDIAN_API UPGAnimNotify_EffectsEmitter : public UAnimNotify
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FString NotifyDisplayName;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FPrimaryAssetId EffectBundle;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FPGEffectSettings_VFX VFXSettings;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FPGEffectSettings_SFX SFXSettings;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldAttached { false };
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
-		meta=(AllowPrivateAccess="true", EditCondition="bShouldAttached", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bShouldAttached", EditConditionHides))
 	FName SocketName;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bPerformTrace { false };
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FPGEffectSettings_Trace TraceSettings;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bSkipVisualFX { false };
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bSkipSoundFX { false };
 
 protected:
 	virtual FString GetNotifyName_Implementation() const override;

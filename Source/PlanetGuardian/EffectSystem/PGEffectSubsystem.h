@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Subsystem/PGGameInstanceSubsystem.h"
+#include "Subsystem/PGWorldSubsystem.h"
 #include "PGEffectSubsystem.generated.h"
 
 class UPGEffectBundle;
@@ -12,7 +12,7 @@ class UNiagaraSystem;
 class USoundBase;
 
 UCLASS()
-class PLANETGUARDIAN_API UPGEffectSubsystem : public UPGGameInstanceSubsystem
+class PLANETGUARDIAN_API UPGEffectSubsystem : public UPGWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -23,8 +23,6 @@ class PLANETGUARDIAN_API UPGEffectSubsystem : public UPGGameInstanceSubsystem
 	TMap<FSoftObjectPath, USoundBase*> SoundFXMap;
 
 public:
-	static UPGEffectSubsystem* Get();
-
 	UNiagaraSystem* GetVisualFX(const FSoftObjectPath& SoftVisualFXPath);
 
 	USoundBase* GetSoundFX(const FSoftObjectPath& SoftSoundFXPath);

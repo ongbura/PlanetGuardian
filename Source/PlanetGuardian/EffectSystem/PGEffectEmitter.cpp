@@ -44,7 +44,7 @@ void APGEffectEmitter::Activate(USkeletalMeshComponent* TargetMesh, const FName&
 	Activate();
 }
 
-void APGEffectEmitter::SetVisualEffectSettings(UNiagaraSystem* Asset, const FPGEffectSettings_VFX& VisualFXSettings)
+void APGEffectEmitter::SetVisualEffectAndSettings(UNiagaraSystem* Asset, const FPGEffectSettings_VFX& VisualFXSettings)
 {
 	if (Asset == nullptr)
 	{
@@ -59,7 +59,7 @@ void APGEffectEmitter::SetVisualEffectSettings(UNiagaraSystem* Asset, const FPGE
 	bSetVisualFX = true;
 }
 
-void APGEffectEmitter::SetSoundEffectSettings(USoundBase* Asset, const FPGEffectSettings_SFX& SoundFXSettings)
+void APGEffectEmitter::SetSoundEffectAndSettings(USoundBase* Asset, const FPGEffectSettings_SFX& SoundFXSettings)
 {
 	if (Asset == nullptr)
 	{

@@ -10,11 +10,6 @@
 #include "System/PGDeveloperSettings.h"
 #include "Sound/SoundBase.h"
 
-UPGEffectSubsystem* UPGEffectSubsystem::Get()
-{
-	return UPGGameGlobals::Get().GetGameInstanceSubsystem<UPGEffectSubsystem>();
-}
-
 UNiagaraSystem* UPGEffectSubsystem::GetVisualFX(const FSoftObjectPath& SoftVisualFXPath)
 {
 	if (!SoftVisualFXPath.IsValid())
@@ -53,13 +48,8 @@ void UPGEffectSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	auto& AssetManager = UPGAssetManager::Get();
 
-	TArray<FPrimaryAssetId> EffectSetPrimaryAssetIds;
-	
-	if (!AssetManager.GetPrimaryAssetIdList(UPGAssetManager::EffectBundleType, EffectSetPrimaryAssetIds))
-	{
-		UE_LOG(PGInitialization, Error, TEXT("%hs: Cannot find any effect set data."), __FUNCTION__);
-		return;
-	}
+	TArray<FPrimaryAssetId> EffectSetPrimaryAssetIds;	
+	AssetManager.GetPrimaryAssetIdList(UPGAssetManager::EffectBundleType, EffectSetPrimaryAssetIds);
 
 	auto Delegate = FStreamableDelegate::CreateUObject(this, &UPGEffectSubsystem::OnEffectBundlesLoaded, MoveTemp(EffectSetPrimaryAssetIds));
 	AssetManager.LoadPrimaryAssets(EffectSetPrimaryAssetIds, {}, MoveTemp(Delegate));
@@ -67,7 +57,10 @@ void UPGEffectSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 bool UPGEffectSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
-	return IsRunningDedicatedServer() ? false : true;
+	const auto* World = Cast<UWorld>(Outer);
+	check(World);
+	
+	return World->GetAuthGameMode() == nullptr;
 }
 
 void UPGEffectSubsystem::OnEffectBundlesLoaded(TArray<FPrimaryAssetId> LoadedAssetIds)

@@ -7,8 +7,6 @@
 #include "AbilitySystemComponent.h"
 #include "PGAttributeSet.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_FourParams(FPGAttributeEvent, AActor* /*EffectInstigator*/, AActor* /*EffectCauser*/, const FGameplayEffectSpec& /*EffectSpec*/, float /*EffectMagnitude*/);
-
 // Uses macros from AttributeSet.h
 #define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
 	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
@@ -18,14 +16,18 @@ DECLARE_MULTICAST_DELEGATE_FourParams(FPGAttributeEvent, AActor* /*EffectInstiga
 
 class UAbilitySystemComponent;
 
-/**
- * 
- */
 UCLASS()
 class PLANETGUARDIAN_API UPGAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 
+public:
+	template <typename UserClass, typename FuncType>
+	void BindAttributeChanged(FGameplayAttribute Attribute, UserClass* User, FuncType Func) const;
+
+	template <typename UserClass>
+	void UnbindAttributeChanged(FGameplayAttribute Attribute, UserClass* User) const;
+	
 protected:
 	FGameplayTag AttributeSetTag;
 
@@ -40,3 +42,38 @@ protected:
 	// Helper function to initialize an attribute's value to match the value of its associated max attribute.
 	void InitializeAttributeForMax(const FGameplayAttribute& Attribute, const FGameplayAttributeData& MaxAttributeData) const;
 };
+
+template <typename UserClass, typename FuncType>
+void UPGAttributeSet::BindAttributeChanged(FGameplayAttribute Attribute, UserClass* User, FuncType Func) const
+{
+	if (FindFProperty<FProperty>(GetClass(), *Attribute.AttributeName) == nullptr)
+	{
+		return;
+	}
+	
+	auto* AbilitySystem = GetOwningAbilitySystemComponent();
+	if (AbilitySystem == nullptr)
+	{
+		return;
+	}
+
+	auto DelegateHandle = AbilitySystem->GetGameplayAttributeValueChangeDelegate(MoveTemp(Attribute)).AddUObject(User, Func);
+}
+
+template <typename UserClass>
+void UPGAttributeSet::UnbindAttributeChanged(FGameplayAttribute Attribute, UserClass* User) const
+{
+	if (FindFProperty<FProperty>(GetClass(), *Attribute.AttributeName) == nullptr)
+	{
+		return;
+	}
+	
+	auto* AbilitySystem = GetOwningAbilitySystemComponent();
+	if (AbilitySystem == nullptr)
+	{
+		return;
+	}
+
+	auto Delegate = AbilitySystem->GetGameplayAttributeValueChangeDelegate(MoveTemp(Attribute));
+	Delegate.RemoveAll(User);
+}

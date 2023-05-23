@@ -7,7 +7,7 @@
 
 UPGHealthSet::UPGHealthSet()
 {
-	AttributeSetTag = GNativeTags.Attribute_Common_Health;
+	AttributeSetTag = PGGameplayTags::Attribute_Common_Health;
 }
 
 void UPGHealthSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -16,6 +16,7 @@ void UPGHealthSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 
 	DOREPLIFETIME_CONDITION_NOTIFY(UPGHealthSet, Health, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UPGHealthSet, MaxHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UPGHealthSet, HealthRegenRate, COND_None, REPNOTIFY_Always);
 }
 
 void UPGHealthSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const
@@ -36,8 +37,10 @@ void UPGHealthSet::PostAttributeChange(const FGameplayAttribute& Attribute, floa
 
 	if (Attribute == GetMaxHealthAttribute())
 	{
-		auto* ASC = GetOwningAbilitySystemComponent();
-		ASC->ApplyModToAttribute(GetHealthAttribute(), EGameplayModOp::Override, NewValue);
+		if (GetHealth() > NewValue)
+		{
+			SetHealth(FMath::Clamp(GetHealth(), MinHealth, NewValue));
+		}
 	}
 }
 
@@ -45,11 +48,10 @@ void UPGHealthSet::ClampAttribute(const FGameplayAttribute& Attribute, float& Ne
 {
 	if (Attribute == GetHealthAttribute())
 	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
+		NewValue = FMath::Clamp(NewValue, MinHealth, GetMaxHealth());
 	}
 	else if (Attribute == GetMaxHealthAttribute())
 	{
-		static constexpr float MinMaxHealth = 1.f;
 		NewValue = FMath::Max(NewValue, MinMaxHealth);
 	}
 }
@@ -62,4 +64,9 @@ void UPGHealthSet::OnRep_Health(const FGameplayAttributeData& OldHealth)
 void UPGHealthSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPGHealthSet, MaxHealth, OldMaxHealth);
+}
+
+void UPGHealthSet::OnRep_HealthRegenRate(const FGameplayAttributeData& OldHealthRegenRate)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPGHealthSet, HealthRegenRate, OldHealthRegenRate);
 }

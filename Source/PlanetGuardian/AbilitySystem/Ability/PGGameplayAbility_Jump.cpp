@@ -8,6 +8,8 @@
 UPGGameplayAbility_Jump::UPGGameplayAbility_Jump()
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::NonInstanced;
+	AbilityTags.AddTag(PGGameplayTags::Ability_Guardian_Movement_Jump);
 }
 
 void UPGGameplayAbility_Jump::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -23,7 +25,7 @@ void UPGGameplayAbility_Jump::ActivateAbility(const FGameplayAbilitySpecHandle H
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		}
 
-		Jump();
+		Jump(ActorInfo);
 	}
 }
 
@@ -39,6 +41,7 @@ bool UPGGameplayAbility_Jump::CanActivateAbility(const FGameplayAbilitySpecHandl
 	const auto* Avatar = Cast<APGGuardian>(ActorInfo->AvatarActor.Get());
 	if (!Avatar || !Avatar->CanJump())
 	{
+		
 		return false;
 	}
 
@@ -55,33 +58,52 @@ void UPGGameplayAbility_Jump::InputReleased(const FGameplayAbilitySpecHandle Han
 {
 	Super::InputReleased(Handle, ActorInfo, ActivationInfo);
 
-	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-}
-
-void UPGGameplayAbility_Jump::EndAbility(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
-	bool bReplicateEndAbility, bool bWasCancelled)
-{
-	StopJumping();
-	
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-}
-
-void UPGGameplayAbility_Jump::Jump()
-{
-	if (auto* Avatar = Cast<APGGuardian>(GetAvatarActorFromActorInfo()))
+	if (ActorInfo != nullptr && ActorInfo->AvatarActor != nullptr)
 	{
-		if (Avatar->IsLocallyControlled() && !Avatar->bPressedJump)
-		{
-			Avatar->UnCrouch();
-			Avatar->Jump();
-		}
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 	}
 }
 
-void UPGGameplayAbility_Jump::StopJumping()
+// Epic's comment
+/**
+ *	Canceling an non instanced ability is tricky. Right now this works for Jump since there is nothing that can go wrong by calling
+ *	StopJumping() if you aren't already jumping. If we had a montage playing non instanced ability, it would need to make sure the
+ *	Montage that *it* played was still playing, and if so, to cancel it. If this is something we need to support, we may need some
+ *	light weight data structure to represent 'non intanced abilities in action' with a way to cancel/end them.
+ */
+void UPGGameplayAbility_Jump::CancelAbility(const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+	bool bReplicateCancelAbility)
 {
-	if (auto* Avatar = Cast<APGGuardian>(GetAvatarActorFromActorInfo()))
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+
+	if (ScopeLockCount > 0)
+	{
+		WaitingToExecute.Add(FPostLockDelegate::CreateUObject(this, &ThisClass::CancelAbility, Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility));
+		return;
+	}
+
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+
+	StopJumping(ActorInfo);
+}
+
+void UPGGameplayAbility_Jump::Jump(const FGameplayAbilityActorInfo* ActorInfo)
+{
+	if (auto* Avatar = Cast<APGGuardian>(ActorInfo->AvatarActor.Get()))
+	{
+		if (Avatar->bIsCrouched)
+		{
+			Avatar->UnCrouch();
+		}
+
+		Avatar->Jump();
+	}
+}
+
+void UPGGameplayAbility_Jump::StopJumping(const FGameplayAbilityActorInfo* ActorInfo)
+{
+	if (auto* Avatar = Cast<APGGuardian>(ActorInfo->AvatarActor.Get()))
 	{
 		if (Avatar->IsLocallyControlled() && Avatar->bPressedJump)
 		{
